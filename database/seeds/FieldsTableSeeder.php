@@ -15,8 +15,8 @@ class FieldsTableSeeder extends Seeder
         if (DB::table('fields')->get()->count() == 0) {
             DB::table('fields')->insert(
                 [
-                    'title' => 'Date Of Birth',
-                    'type'  => 'date',
+                    'title' => 'User code',
+                    'type'  => 'string',
                 ]
             );
             DB::table('fields')->insert(
