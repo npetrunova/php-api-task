@@ -41,33 +41,34 @@ class SubscriberController extends Controller
 
         // If no additional fields, just create subscriber
         if ($fields === null || count($fields) === 0) {
-            $subscriber = Subscriber::create(['name' => $name, 'email' => $email]);
-            // Select newly created subscriber
-            $createdRecord = Subscriber::find($subscriber->id);
-            unset($createdRecord['updated_at']);
-            unset($createdRecord['created_at']);
-
+            $createdRecord = $this->saveSubscriber($name, $email);
             $responseArray = ['data' => ['msg' => 'Subscriber created successfully', 'subscriber' => $createdRecord]];
 
             return response()->json($responseArray, 200);
         }
+        // Make sure the field values are of valid types
         $fieldValidationErrors = $this->checkFieldsForErrors($fields);
         if (!empty($fieldValidationErrors)) {
             return response()->json(['errors' => $fieldValidationErrors], 422);
         }
 
-        $subscriber = Subscriber::create(['name' => $name, 'email' => $email]);
-        $createdRecord = Subscriber::find($subscriber->id);
-        unset($createdRecord['updated_at']);
-        unset($createdRecord['created_at']);
+        $createdRecord = $this->saveSubscriber($name, $email);
         foreach ($fields as $field) {
-            $subscriberField = SubscriberField::create(['subscriber_id' => $subscriber->id,'field_id' => $field['id'], 'value' => $field['value']]);
+            $subscriberField = SubscriberField::create(['subscriber_id' => $createdRecord->id,'field_id' => $field['id'], 'value' => $field['value']]);
         }
         $createdRecord['fields'] = $fields;
 
         return response()->json(['data' =>['msg' => 'Subscriber created successfully!', 'subscriber' => $createdRecord]], 201);
     }
+    private function saveSubscriber($name, $email)
+    {
+        $subscriber = Subscriber::create(['name' => $name, 'email' => $email]);
+        $createdRecord = Subscriber::find($subscriber->id);
+        unset($createdRecord['updated_at']);
+        unset($createdRecord['created_at']);
 
+        return $createdRecord;
+    }
     private function checkFieldsForErrors($fields)
     {
         $fieldValidationErrors = [];
