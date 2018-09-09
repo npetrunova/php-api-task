@@ -19,3 +19,7 @@ Route::post('createField', 'FieldController@createField')->name('createField');
 Route::delete('deleteField/{id}', 'FieldController@deleteField')->name('deleteField');
 
 Route::post('createSubcriber', 'SubscriberController@createSubcriber')->name('createSubcriber');
+Route::get('getSubscribers', 'SubscriberController@retrieveSubscribers')->name('retrieveSubscribers');
+Route::get('getSubscriber/{id}', 'SubscriberController@retrieveSubscriber')->name('retrieveSubscriber');
+Route::delete('deleteSubscriber/{id}', 'SubscriberController@deleteSubscriber')->name('deleteSubscriber');
+Route::post('updateSubscriber/{id}', 'SubscriberController@updateSubscriber')->name('updateSubscriber');

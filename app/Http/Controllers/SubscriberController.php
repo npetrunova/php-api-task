@@ -57,7 +57,7 @@ class SubscriberController extends Controller
             $subscriberField = SubscriberField::create(['subscriber_id' => $subscriber->id,'field_id' => $field['id'], 'value' => $field['value']]);
         }
         $createdRecord['fields'] = $fields;
-        
+
         return response()->json(['data' =>['msg' => 'Subscriber created successfully!', 'subscriber' => $createdRecord]], 201);
     }
 
@@ -97,5 +97,110 @@ class SubscriberController extends Controller
             case 'date':
                 return (bool)strtotime($fieldValue);
         }
+    }
+
+    public function retrieveSubscribers()
+    {
+        $subscribers = Subscriber::with('fields.field')->get();
+
+        if (count($subscribers) > 0) {
+            $responseArray = [];
+            foreach ($subscribers as $subscriber) {
+                $formatedSubscriber = $this->formatSubscriberData($subscriber);
+                $responseArray[] = $formatedSubscriber;
+            }
+            return response()->json(['data' => $responseArray], 200);
+        }
+
+        return response()->json([], 204);
+    }
+
+    public function retrieveSubscriber($id)
+    {
+        $subscriber = Subscriber::find($id);
+
+        if ($subscriber === null) {
+            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+        }
+        $responseArray = $this->formatSubscriberData($subscriber);
+
+        return response()->json(['data' => $responseArray], 200);
+    }
+
+    public function deleteSubscriber($id)
+    {
+        $subscriber = Subscriber::find($id);
+
+        if (!$subscriber) {
+            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+        }
+        $subscriber->delete();
+
+        return response()->json(['data' =>['msg' => 'Subscriber deleted successfully!']], 200);
+    }
+
+    public function updateSubscriber($id, Request $request)
+    {
+        $subscriber = Subscriber::find($id);
+
+        if (!$subscriber) {
+            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+        }
+        // ADD VALIDATION
+        $subscriber->name = $request->input('name');
+        $subscriber->email = $request->input('email');
+        $subscriber->state = $request->input('state');
+
+        if (count($request->input('delete-fields')) > 0) {
+            foreach ($request->input('delete-fields') as $toDelete) {
+                $subscriberField = SubscriberField::where('subscriber_id', $id)->where('field_id', $toDelete)->first();
+                if ($subscriberField !== null) {
+                    $subscriberField->delete();
+                }
+            }
+        }
+
+        if (count($request->input('updated-fields')) > 0) {
+            foreach ($request->input('updated-fields') as $toUpdate) {
+                $subscriberField = SubscriberField::where('subscriber_id', $id)->where('field_id', $toUpdate['id'])->first();
+                if ($subscriberField !== null) {
+                    $subscriberField->value = $toUpdate['value'];
+                    $subscriberField->save(); //check for validation
+                }
+            }
+        }
+        //add validation
+        if (count($request->input('new-fields')) > 0) {
+            foreach ($request->input('new-fields') as $newField) {
+                $subscriberField = SubscriberField::create(['subscriber_id' => $id, 'field_id' => $newField['id'], 'value' => $newField['value']]);
+            }
+        }
+
+        $subscriber->save();
+
+        return response()->json(['data' =>['msg' => 'Subscriber updated successfully!']], 200);
+    }
+
+    private function formatSubscriberData($subscriber)
+    {
+        $responseArray = [];
+        $subscriberId = $subscriber->id;
+        $responseArray['id'] = $subscriberId;
+        $responseArray['name'] = $subscriber->name;
+        $responseArray['email'] = $subscriber->email;
+        $responseArray['state'] = $subscriber->state;
+        if (count($subscriber->fields) == 0) {
+            $responseArray['fields'] = [];
+        } else {
+            foreach ($subscriber->fields as $field) {
+                $subscriberFieldId = $field->id;
+                $responseArray['fields'][$subscriberFieldId]['id'] = $subscriberFieldId;
+                $responseArray['fields'][$subscriberFieldId]['fieldId'] = $field->field_id;
+                $responseArray['fields'][$subscriberFieldId]['value'] = $field->value;
+                $responseArray['fields'][$subscriberFieldId]['title'] = $field->field->title;
+            }
+        }
+
+        return $responseArray;
     }
 }
