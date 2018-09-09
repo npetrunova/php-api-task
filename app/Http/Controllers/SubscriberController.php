@@ -44,12 +44,16 @@ class SubscriberController extends Controller
 
         $createdRecord = $this->saveSubscriber($name, $email);
         foreach ($fields as $field) {
-            $subscriberField = SubscriberField::create(['subscriber_id' => $createdRecord->id,'field_id' => $field['id'], 'value' => $field['value']]);
+            $subscriberField = SubscriberField::create(
+                ['subscriber_id' => $createdRecord->id,'field_id' => $field['id'], 'value' => $field['value']]
+            );
         }
         $createdRecord['fields'] = $fields;
 
-        return response()->json(['data' =>['msg' => 'Subscriber created successfully!', 'subscriber' => $createdRecord]], 201);
+        return response()->json(['data' =>
+            ['msg' => 'Subscriber created successfully!', 'subscriber' => $createdRecord]], 201);
     }
+
     private function saveSubscriber($name, $email)
     {
         $subscriber = Subscriber::create(['name' => $name, 'email' => $email]);
@@ -59,6 +63,7 @@ class SubscriberController extends Controller
 
         return $createdRecord;
     }
+
     private function checkFieldsForErrors($fields)
     {
         $fieldValidationErrors = [];
@@ -189,7 +194,10 @@ class SubscriberController extends Controller
         if ($request->input('fields') !== null && count($request->input('fields')) > 0) {
             $isValidFields = true;
             foreach ($request->input('fields') as $toUpdate) {
-                $subscriberField = SubscriberField::with('field')->where('subscriber_id', $id)->where('field_id', $toUpdate['id'])->first();
+                $subscriberField = SubscriberField::with('field')
+                    ->where('subscriber_id', $id)
+                    ->where('field_id', $toUpdate['id'])
+                    ->first();
                 $isValidType  = $this->validateFieldType($subscriberField->field->type, $toUpdate['value']);
                 if ($subscriberField === null || !$isValidType) {
                     $isValidFields  = false;
@@ -200,7 +208,10 @@ class SubscriberController extends Controller
                 return response()->json(['errors' => 'Invalid value type, could not update fields.'], 422);
             }
             foreach ($request->input('fields') as $toUpdate) {
-                $subscriberField = SubscriberField::with('field')->where('subscriber_id', $id)->where('field_id', $toUpdate['id'])->first();
+                $subscriberField = SubscriberField::with('field')
+                    ->where('subscriber_id', $id)
+                    ->where('field_id', $toUpdate['id'])
+                    ->first();
                     $subscriberField->value = $toUpdate['value'];
                     $subscriberField->save(); //check for validation
             }
@@ -233,18 +244,22 @@ class SubscriberController extends Controller
                     break;
                 }
                 $isValidInput = $this->validateFieldType($fieldModel->type, $newField['value']);
-                $existsAlready = SubscriberField::where('field_id', $newField['id'])->where('subscriber_id', $id)->exists();
+                $existsAlready = SubscriberField::where('field_id', $newField['id'])
+                    ->where('subscriber_id', $id)
+                    ->exists();
                 if (!$isValidInput || $existsAlready) {
                     $isValidFields = false;
                 }
             }
 
             if (!$isValidFields) {
-                return response()->json(['errors' => 'Invalid value type or field already exists, could not insert fields.'], 422);
+                return response()->json(['errors' =>
+                    'Invalid value type or field already exists, could not insert fields.'], 422);
             }
 
             foreach ($request->input('fields') as $newField) {
-                $subscriberField = SubscriberField::create(['subscriber_id' => $id, 'field_id' => $newField['id'], 'value' => $newField['value']]);
+                $subscriberField = SubscriberField::create(['subscriber_id' =>
+                    $id, 'field_id' => $newField['id'], 'value' => $newField['value']]);
             }
 
             return response()->json(['data' =>['msg' => 'Subscriber fields added successfully!']], 200);

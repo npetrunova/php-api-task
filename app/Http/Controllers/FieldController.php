@@ -59,7 +59,8 @@ class FieldController extends Controller
         }
         $subscriberFields = SubscriberField::where('field_id', $id)->exists();
         if ($subscriberFields) {
-            return response()->json(['errors' => ['id' => ['Cannot delete field as it is assigned to subscribers']]], 422);
+            return response()->json(['errors' => ['id' =>
+                ['Cannot delete field as it is assigned to subscribers']]], 422);
         }
 
         $field->delete();
