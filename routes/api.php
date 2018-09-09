@@ -23,3 +23,6 @@ Route::get('getSubscribers', 'SubscriberController@retrieveSubscribers')->name('
 Route::get('getSubscriber/{id}', 'SubscriberController@retrieveSubscriber')->name('retrieveSubscriber');
 Route::delete('deleteSubscriber/{id}', 'SubscriberController@deleteSubscriber')->name('deleteSubscriber');
 Route::post('updateSubscriber/{id}', 'SubscriberController@updateSubscriber')->name('updateSubscriber');
+Route::post('updateSubscriberFields/{id}', 'SubscriberController@updateSubscriberFields')->name('updateSubscriberFields');
+Route::post('addSubscriberFields/{id}', 'SubscriberController@addSubscriberFields')->name('addSubscriberFields');
+Route::delete('deleteSubscriberFields/{id}', 'SubscriberController@deleteSubscriberFields')->name('deleteSubscriberFields');

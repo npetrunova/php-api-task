@@ -32,6 +32,13 @@ class SubscriberController extends Controller
         $name = $request->input('name');
         $email = $request->input('email');
         $fields = $request->input('fields');
+        // Validate email domain
+        $isValidEmailDomain = $this->validateEmailDomain($email);
+
+        if (!$isValidEmailDomain) {
+            return response()->json(['errors' => 'Invalid emmail domain'], 422);
+        }
+
         // If no additional fields, just create subscriber
         if ($fields === null || count($fields) === 0) {
             $subscriber = Subscriber::create(['name' => $name, 'email' => $email]);
@@ -141,44 +148,154 @@ class SubscriberController extends Controller
 
     public function updateSubscriber($id, Request $request)
     {
+        $acceptedStates = ['active', 'unsubscribed', 'junk', 'bounced', 'unconfirmed'];
+        $validator = Validator::make($request->all(), [
+            'name' => 'max:100',
+            'email' => 'email|max:320',
+            'state' => 'in:'.implode(',', $acceptedStates)
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return response()->json(['errors' => $errors->toArray()], 422);
+        }
+
         $subscriber = Subscriber::find($id);
 
         if (!$subscriber) {
             return response()->json(['errors' => ['id' => ['Record not found']]], 404);
         }
-        // ADD VALIDATION
+
+        $isValidEmailDomain = $this->validateEmailDomain($request->input('email'));
+
+        if (!$isValidEmailDomain) {
+            return response()->json(['errors' => 'Invalid emmail domain'], 422);
+        }
+
         $subscriber->name = $request->input('name');
         $subscriber->email = $request->input('email');
         $subscriber->state = $request->input('state');
+        $subscriber->save();
 
-        if (count($request->input('delete-fields')) > 0) {
-            foreach ($request->input('delete-fields') as $toDelete) {
+        return response()->json(['data' =>['msg' => 'Subscriber updated successfully!']], 200);
+    }
+
+    public function updateSubscriberFields($id, Request $request)
+    {
+        $messages = [
+            'fields.*.value.required' => 'Value is required for all fields.',
+            'fields.*.value.max' => 'Value cannot be bigger than 255 symbols.',
+            'fields.*.id.required'    => 'ID is required for all fields.',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'fields.*.value' => 'required|max:255',
+            'fields.*.id' => 'required'
+        ], $messages);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return response()->json(['errors' => $errors->toArray()], 422);
+        }
+
+        $subscriber = Subscriber::find($id);
+
+        if (!$subscriber) {
+            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+        }
+
+        if ($request->input('fields') !== null && count($request->input('fields')) > 0) {
+            $isValidFields = true;
+            foreach ($request->input('fields') as $toUpdate) {
+                $subscriberField = SubscriberField::with('field')->where('subscriber_id', $id)->where('field_id', $toUpdate['id'])->first();
+                $isValidType  = $this->validateFieldType($subscriberField->field->type, $toUpdate['value']);
+                if ($subscriberField === null || !$isValidType) {
+                    $isValidFields  = false;
+                    break;
+                }
+            }
+            if (!$isValidFields) {
+                return response()->json(['errors' => 'Invalid value type, could not update fields.'], 422);
+            }
+            foreach ($request->input('fields') as $toUpdate) {
+                $subscriberField = SubscriberField::with('field')->where('subscriber_id', $id)->where('field_id', $toUpdate['id'])->first();
+                    $subscriberField->value = $toUpdate['value'];
+                    $subscriberField->save(); //check for validation
+            }
+
+            return response()->json(['data' =>['msg' => 'Subscriber fields updated successfully!']], 200);
+        }
+    }
+
+    public function addSubscriberFields($id, Request $request)
+    {
+        $messages = [
+            'fields.*.value.required' => 'Value is required for all fields.',
+            'fields.*.value.max' => 'Value cannot be bigger than 255 symbols.',
+            'fields.*.id.required'    => 'ID is required for all fields.',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'fields.*.value' => 'required|max:255',
+            'fields.*.id' => 'required'
+        ], $messages);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return response()->json(['errors' => $errors->toArray()], 422);
+        }
+
+        $subscriber = Subscriber::find($id);
+
+        if (!$subscriber) {
+            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+        }
+
+        if ($request->input('fields') !== null && count($request->input('fields')) > 0) {
+            $isValidFields = true;
+            foreach ($request->input('fields') as $newField) {
+                $fieldModel = Field::select(['title', 'type'])->where('id', $newField['id'])->first();
+                if ($fieldModel === null) {
+                    $isValidFields = false;
+                    break;
+                }
+                $isValidInput = $this->validateFieldType($fieldModel->type, $newField['value']);
+                $existsAlready = SubscriberField::where('field_id', $newField['id'])->where('subscriber_id', $id)->exists();
+                if (!$isValidInput || $existsAlready) {
+                    $isValidFields = false;
+                }
+            }
+
+            if (!$isValidFields) {
+                return response()->json(['errors' => 'Invalid value type or field already exists, could not insert fields.'], 422);
+            }
+
+            foreach ($request->input('fields') as $newField) {
+                $subscriberField = SubscriberField::create(['subscriber_id' => $id, 'field_id' => $newField['id'], 'value' => $newField['value']]);
+            }
+
+            return response()->json(['data' =>['msg' => 'Subscriber fields added successfully!']], 200);
+        }
+    }
+
+    public function deleteSubscriberFields($id, Request $request)
+    {
+        $subscriber = Subscriber::find($id);
+
+        if (!$subscriber) {
+            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+        }
+
+        if ($request->input('fieldIds') !== null && count($request->input('fieldIds')) > 0) {
+            foreach ($request->input('fieldIds') as $toDelete) {
                 $subscriberField = SubscriberField::where('subscriber_id', $id)->where('field_id', $toDelete)->first();
                 if ($subscriberField !== null) {
                     $subscriberField->delete();
                 }
             }
-        }
 
-        if (count($request->input('updated-fields')) > 0) {
-            foreach ($request->input('updated-fields') as $toUpdate) {
-                $subscriberField = SubscriberField::where('subscriber_id', $id)->where('field_id', $toUpdate['id'])->first();
-                if ($subscriberField !== null) {
-                    $subscriberField->value = $toUpdate['value'];
-                    $subscriberField->save(); //check for validation
-                }
-            }
+            return response()->json(['data' =>['msg' => 'Subscriber fields deleted successfully!']], 200);
         }
-        //add validation
-        if (count($request->input('new-fields')) > 0) {
-            foreach ($request->input('new-fields') as $newField) {
-                $subscriberField = SubscriberField::create(['subscriber_id' => $id, 'field_id' => $newField['id'], 'value' => $newField['value']]);
-            }
-        }
-
-        $subscriber->save();
-
-        return response()->json(['data' =>['msg' => 'Subscriber updated successfully!']], 200);
     }
 
     private function formatSubscriberData($subscriber)
@@ -202,5 +319,11 @@ class SubscriberController extends Controller
         }
 
         return $responseArray;
+    }
+
+    private function validateEmailDomain($email)
+    {
+        list($user, $domain) = explode('@', $email);
+        return checkdnsrr($domain, 'MX');
     }
 }
