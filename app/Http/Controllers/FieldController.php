@@ -57,6 +57,11 @@ class FieldController extends Controller
         if (!$field) {
             return response()->json(['errors' => ['id' => ['Record not found']]], 404);
         }
+        $subscriberFields = SubscriberField::where('field_id', $id)->exists();
+        if ($subscriberFields) {
+            return response()->json(['errors' => ['id' => ['Cannot delete field as it is assigned to subscribers']]], 422);
+        }
+
         $field->delete();
 
         return response()->json(['data' =>['msg' => 'Field deleted successfully!']], 200);
