@@ -39,7 +39,6 @@ class FieldController extends Controller
             'title' => 'required',
             'type' => 'required|in:'.implode(',', $acceptedTypes),
         ]);
-
         if ($validator->fails()) {
             $errors = $validator->errors();
             return response()->json(['errors' => $errors->toArray()], 422);
