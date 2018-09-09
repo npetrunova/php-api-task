@@ -12,17 +12,7 @@ class SubscriberController extends Controller
 {
     public function createSubcriber(Request $request)
     {
-        $messages = [
-            'fields.*.value.required' => 'Value is required for all fields.',
-            'fields.*.value.max' => 'Value cannot be bigger than 255 symbols.',
-            'fields.*.id.required'    => 'ID is required for all fields.',
-        ];
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|max:100',
-            'email' => 'required|email|max:320',
-            'fields.*.value' => 'required|max:255',
-            'fields.*.id' => 'required'
-        ], $messages);
+        $validator = Validator::make($request->all(), Subscriber::$rules, Subscriber::$messages);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -183,16 +173,7 @@ class SubscriberController extends Controller
 
     public function updateSubscriberFields($id, Request $request)
     {
-        $messages = [
-            'fields.*.value.required' => 'Value is required for all fields.',
-            'fields.*.value.max' => 'Value cannot be bigger than 255 symbols.',
-            'fields.*.id.required'    => 'ID is required for all fields.',
-        ];
-
-        $validator = Validator::make($request->all(), [
-            'fields.*.value' => 'required|max:255',
-            'fields.*.id' => 'required'
-        ], $messages);
+        $validator = Validator::make($request->all(), SubscriberField::$rules, SubscriberField::$messages);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -230,16 +211,7 @@ class SubscriberController extends Controller
 
     public function addSubscriberFields($id, Request $request)
     {
-        $messages = [
-            'fields.*.value.required' => 'Value is required for all fields.',
-            'fields.*.value.max' => 'Value cannot be bigger than 255 symbols.',
-            'fields.*.id.required'    => 'ID is required for all fields.',
-        ];
-
-        $validator = Validator::make($request->all(), [
-            'fields.*.value' => 'required|max:255',
-            'fields.*.id' => 'required'
-        ], $messages);
+        $validator = Validator::make($request->all(), SubscriberField::$rules, SubscriberField::$messages);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
