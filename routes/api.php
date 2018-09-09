@@ -17,3 +17,5 @@ Route::get('getFields', 'FieldController@retrieveFields')->name('retrieveFields'
 Route::get('getField/{id}', 'FieldController@retrieveField')->name('retrieveField');
 Route::post('createField', 'FieldController@createField')->name('createField');
 Route::delete('deleteField/{id}', 'FieldController@deleteField')->name('deleteField');
+
+Route::post('createSubcriber', 'SubscriberController@createSubcriber')->name('createSubcriber');
