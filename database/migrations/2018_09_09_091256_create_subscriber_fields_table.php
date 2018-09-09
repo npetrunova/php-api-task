@@ -15,12 +15,12 @@ class CreateSubscriberFieldsTable extends Migration
     {
         Schema::create('subscriber_fields', function (Blueprint $table) {
             $table->increments('id');
-            $table->interger('subsciber_id');
-            $table->integer('field_id');
+            $table->unsignedInteger('subscriber_id');
+            $table->unsignedInteger('field_id');
             $table->string('value');
             $table->timestamps();
-            $table->foreign('subscriber_id')->reference('id')->on('subscibers')->onDelete('cascade');
-            $table->foreign('field_id')->reference('id')->on('fields')->onDelete('cascade');
+            $table->foreign('subscriber_id')->references('id')->on('subscribers')->onDelete('cascade');
+            $table->foreign('field_id')->references('id')->on('fields')->onDelete('cascade');
         });
     }
 
