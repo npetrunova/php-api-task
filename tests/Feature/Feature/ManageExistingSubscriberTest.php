@@ -22,11 +22,11 @@ class ManageExistingSubscriberTest extends TestCase
             ->assertJsonFragment([
                 'data' => [
                     'msg' => "Subscriber updated successfully!"
-                ]        
+                ]
             ]);
     }
     /**
-     * Testing refuse to update if new email doesn't have a 
+     * Testing refuse to update if new email doesn't have a
      * valide domain
      */
     public function testupdateSubscriberFailOnEmailDomainCheck()
@@ -35,7 +35,7 @@ class ManageExistingSubscriberTest extends TestCase
 
         $this->json('POST', 'api/updateSubscriber/3', $payload)
             ->assertStatus(422)
-            ->assertSeeText( 'Invalid emmail domain' );
+            ->assertSeeText('Invalid emmail domain');
     }
     /**
      * Testing updating successfully a subscriber's state
@@ -50,7 +50,7 @@ class ManageExistingSubscriberTest extends TestCase
             ->assertJsonFragment([
                 'data' => [
                     'msg' => "Subscriber state updated successfully!"
-                ]        
+                ]
             ]);
     }
     /**
@@ -64,7 +64,7 @@ class ManageExistingSubscriberTest extends TestCase
         $this->json('POST', 'api/updateSubscriberState/3', $payload)
             ->assertStatus(422)
             ->assertJsonStructure([
-                'errors'   
+                'errors'
             ]);
     }
     /**
@@ -77,7 +77,7 @@ class ManageExistingSubscriberTest extends TestCase
                 [
                 'id' => '1',
                 'value' => 'jfdj'
-                ]   
+                ]
             ]
         ];
 
@@ -86,7 +86,7 @@ class ManageExistingSubscriberTest extends TestCase
             ->assertJsonFragment([
                 'data' => [
                     'msg' => "Subscriber fields added successfully!"
-                ]        
+                ]
             ]);
     }
     /**
@@ -100,7 +100,7 @@ class ManageExistingSubscriberTest extends TestCase
                 [
                 'id' => '1',
                 'value' => 'jfdj'
-                ]   
+                ]
             ]
         ];
 
@@ -108,7 +108,7 @@ class ManageExistingSubscriberTest extends TestCase
             ->assertStatus(422)
             ->assertJsonFragment([
                 'errors' =>
-                    'Invalid value type or field already exists, could not insert fields.'      
+                    ['Invalid value type or field already exists, could not insert fields.']
             ]);
     }
     /**
@@ -122,7 +122,7 @@ class ManageExistingSubscriberTest extends TestCase
                 [
                 'id' => '2',
                 'value' => 'jfdj'
-                ]   
+                ]
             ]
         ];
 
@@ -130,7 +130,7 @@ class ManageExistingSubscriberTest extends TestCase
             ->assertStatus(422)
             ->assertJsonFragment([
                 'errors' =>
-                    'Invalid value type or field already exists, could not insert fields.'      
+                    ['Invalid value type or field already exists, could not insert fields.']
             ]);
     }
     /**
@@ -143,7 +143,7 @@ class ManageExistingSubscriberTest extends TestCase
                 [
                 'id' => '1',
                 'value' => 'edited'
-                ]   
+                ]
             ]
         ];
 
@@ -152,11 +152,11 @@ class ManageExistingSubscriberTest extends TestCase
             ->assertJsonFragment([
                 'data' => [
                     'msg' => "Subscriber fields updated successfully!"
-                ]      
+                ]
             ]);
     }
     /**
-     * Testing that you can't update a subscriber field 
+     * Testing that you can't update a subscriber field
      * if the field value is not valid
      */
     public function testUpdateFieldsToUserToFailInvalidFieldType()
@@ -166,7 +166,7 @@ class ManageExistingSubscriberTest extends TestCase
                 [
                 'id' => '1',
                 'value' => false
-                ]   
+                ]
             ]
         ];
 
@@ -174,7 +174,7 @@ class ManageExistingSubscriberTest extends TestCase
             ->assertStatus(422)
             ->assertJsonFragment([
                 'errors' =>
-                    'Invalid value type, could not update fields.'      
+                    ['Invalid value type, could not update fields.']
             ]);
     }
 
@@ -188,7 +188,7 @@ class ManageExistingSubscriberTest extends TestCase
             ->assertJsonFragment([
                 'data' => [
                     'msg' => "Subscriber fields deleted successfully!"
-                ]      
+                ]
             ]);
     }
 }

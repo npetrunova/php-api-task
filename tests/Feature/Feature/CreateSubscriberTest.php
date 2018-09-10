@@ -29,7 +29,7 @@ class CreateSubscriberTest extends TestCase
                         'email',
                         'state'
                     ],
-                ]    
+                ]
             ]);
     }
     /**
@@ -40,13 +40,13 @@ class CreateSubscriberTest extends TestCase
     public function testCreateSubscriberWithFieldsSuccessfully()
     {
         $payload = [
-            'email' => 'testlogin@gmail.com', 
+            'email' => 'testlogin@gmail.com',
             'name' => 'Johny B',
             'fields' => [
                 [
                 'id' => '1',
                 'value' => 'jfdj'
-                ]   
+                ]
             ]
         ];
 
@@ -67,11 +67,11 @@ class CreateSubscriberTest extends TestCase
                             ]
                         ]
                     ],
-                 ]    
+                 ]
             ]);
     }
     /**
-     * Test to fail to create a user only with name and email because 
+     * Test to fail to create a user only with name and email because
      * of wrong email domain
      * @return void
      */
@@ -81,7 +81,7 @@ class CreateSubscriberTest extends TestCase
 
         $this->json('POST', 'api/createSubcriber', $payload)
             ->assertStatus(422)
-            ->assertSeeText( 'Invalid emmail domain' );
+            ->assertSeeText('Invalid emmail domain');
     }
     /**
      * Test to fail to create a user with fields because of wrong type
@@ -90,20 +90,20 @@ class CreateSubscriberTest extends TestCase
     public function testCreateSubscriberToFailwithWrongFieldValueType()
     {
         $payload = [
-            'email' => 'testlogin@gmail.com', 
+            'email' => 'testlogin@gmail.com',
             'name' => 'Johny B',
             'fields' => [
                 [
                 'id' => '2',
                 'value' => 'jfdgh'
-                ]   
+                ]
             ]
         ];
 
         $this->json('POST', 'api/createSubcriber', $payload)
             ->assertStatus(422)
             ->assertJsonStructure([
-                'errors'   
+                'errors'
             ]);
     }
     /**
@@ -113,19 +113,19 @@ class CreateSubscriberTest extends TestCase
     public function testCreateSubscriberToFailwithNoFieldValueType()
     {
         $payload = [
-            'email' => 'testlogin@gmail.com', 
+            'email' => 'testlogin@gmail.com',
             'name' => 'Johny B',
             'fields' => [
                 [
                 'id' => '2'
-                ]   
+                ]
             ]
         ];
 
         $this->json('POST', 'api/createSubcriber', $payload)
             ->assertStatus(422)
             ->assertJsonStructure([
-                'errors'   
+                'errors'
             ]);
     }
     /**
@@ -134,19 +134,19 @@ class CreateSubscriberTest extends TestCase
     public function testCreateSubscriberToFailwithNoName()
     {
         $payload = [
-            'email' => 'testlogin@gmail.com', 
+            'email' => 'testlogin@gmail.com',
             'fields' => [
                 [
                 'id' => '2',
                 'value' => '3'
-                ]   
+                ]
             ]
         ];
 
         $this->json('POST', 'api/createSubcriber', $payload)
             ->assertStatus(422)
             ->assertJsonStructure([
-                'errors'   
+                'errors'
             ]);
     }
 }

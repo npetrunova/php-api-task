@@ -31,7 +31,7 @@ class SubscriberController extends Controller
         $isValidEmailDomain = validateEmailDomain($email);
 
         if (!$isValidEmailDomain) {
-            return response()->json(['errors' => 'Invalid emmail domain'], 422);
+            return response()->json(['errors' => ['Invalid emmail domain']], 422);
         }
 
         // If no additional fields, just create subscriber
@@ -58,6 +58,7 @@ class SubscriberController extends Controller
         return response()->json(['data' =>
             ['msg' => 'Subscriber created successfully!', 'subscriber' => $createdRecord]], 201);
     }
+
     /**
      * Function to save a subscriber that's being called if
      * the data passed in the request passes all validations
@@ -68,12 +69,11 @@ class SubscriberController extends Controller
     private function saveSubscriber($name, $email)
     {
         $subscriber = Subscriber::create(['name' => $name, 'email' => $email]);
-        $createdRecord = Subscriber::find($subscriber->id);
-        unset($createdRecord['updated_at']);
-        unset($createdRecord['created_at']);
+        $createdRecord = Subscriber::select('id', 'name', 'email', 'state')->where('id', $subscriber->id)->first();
 
         return $createdRecord;
     }
+
     /**
      * Function to retrieve all existing subscribers
      * @return Response
@@ -89,6 +89,7 @@ class SubscriberController extends Controller
 
         return response()->json([], 204);
     }
+
     /**
      * Function to retrieve all existing subscribers that have a given state
      * @param String $state
@@ -97,7 +98,7 @@ class SubscriberController extends Controller
     public function retrieveSubscribersByState($state)
     {
         $subscribers = Subscriber::with('fields.field')
-            ->where('state',$state)
+            ->where('state', $state)
             ->get();
 
         if (count($subscribers) > 0) {
@@ -107,6 +108,7 @@ class SubscriberController extends Controller
 
         return response()->json([], 204);
     }
+
     /**
      * Function to retrieve one subscriber given an id
      * @param int $id
@@ -123,9 +125,10 @@ class SubscriberController extends Controller
 
         return response()->json(['data' => $responseArray], 200);
     }
+
     /**
      * Function to delete a subscriber given an id.
-     * The deletion process removes any subscriber fields 
+     * The deletion process removes any subscriber fields
      * for that subscriber
      * @param int $id
      * @return Response
@@ -141,6 +144,7 @@ class SubscriberController extends Controller
 
         return response()->json(['data' =>['msg' => 'Subscriber deleted successfully!']], 200);
     }
+
     /**
      * Function to update subscriber's basic info (email and name) given an id
      * Performs validation checks on name and email (including email domain validation)
@@ -170,7 +174,7 @@ class SubscriberController extends Controller
         $isValidEmailDomain = validateEmailDomain($request->input('email'));
 
         if (!$isValidEmailDomain) {
-            return response()->json(['errors' => 'Invalid emmail domain'], 422);
+            return response()->json(['errors' => ['Invalid emmail domain']], 422);
         }
 
         $subscriber->name = $request->input('name');
@@ -179,6 +183,7 @@ class SubscriberController extends Controller
 
         return response()->json(['data' =>['msg' => 'Subscriber updated successfully!']], 200);
     }
+
     /**
      * Function to update subscriber's state given an id
      * It would only update the state if it's one of the accepted values

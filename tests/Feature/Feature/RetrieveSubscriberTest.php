@@ -18,14 +18,14 @@ class RetrieveSubscriberTest extends TestCase
         $this->json('GET', 'api/getSubscribers')
             ->assertStatus(200)
             ->assertJsonStructure([
-                'data' => []    
+                'data' => []
             ]);
     }
     /**
      * This test should pass assuming that no changes to the data have been
      * done to subscriber with id 2. A seeder has been made to provide it
      * with state value 'active'
-     * 
+     *
      * @return void
      */
     public function testRetrieveAllSubscribersByStateSuccessfully()
@@ -37,7 +37,7 @@ class RetrieveSubscriberTest extends TestCase
                         "name"=> "Jane Doe",
                         "email"=> "jane@gmail.com",
                         "state"=> "active",
-                        "fields"=> [] 
+                        "fields"=> []
             ])
             ->assertDontSeeText('unconfirmed')
             ->assertDontSeeText('unsubscribed')
@@ -66,7 +66,7 @@ class RetrieveSubscriberTest extends TestCase
                             "title" => "User code"
                         ]
                     ]
-                ]   
+                ]
             ]);
     }
 

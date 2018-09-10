@@ -45,7 +45,7 @@ class SubscriberFieldController extends Controller
                 }
             }
             if (!$isValidFields) {
-                return response()->json(['errors' => 'Invalid value type, could not update fields.'], 422);
+                return response()->json(['errors' => ['Invalid value type, could not update fields.']], 422);
             }
             foreach ($request->input('fields') as $toUpdate) {
                 $subscriberField = SubscriberField::with('field')
@@ -53,12 +53,13 @@ class SubscriberFieldController extends Controller
                     ->where('field_id', $toUpdate['id'])
                     ->first();
                     $subscriberField->value = $toUpdate['value'];
-                    $subscriberField->save(); 
+                    $subscriberField->save();
             }
 
             return response()->json(['data' =>['msg' => 'Subscriber fields updated successfully!']], 200);
         }
     }
+
     /**
      * Adds an array of subscriber fields given a subscriber id
      * @param int $id
@@ -99,7 +100,7 @@ class SubscriberFieldController extends Controller
 
             if (!$isValidFields) {
                 return response()->json(['errors' =>
-                    'Invalid value type or field already exists, could not insert fields.'], 422);
+                    ['Invalid value type or field already exists, could not insert fields.']], 422);
             }
 
             foreach ($request->input('fields') as $newField) {
@@ -110,6 +111,7 @@ class SubscriberFieldController extends Controller
             return response()->json(['data' =>['msg' => 'Subscriber fields added successfully!']], 200);
         }
     }
+
     /**
      * Deletes an array of subscriber fields given a subscriber id
      * @param int $id

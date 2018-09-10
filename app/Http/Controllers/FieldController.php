@@ -23,22 +23,22 @@ class FieldController extends Controller
 
         return response()->json([], 204);
     }
+
     /**
      * Retreieve a field given an id
      * @param int $id
      */
     public function retrieveField($id)
     {
-        $field = Field::find($id);
+        $field = Field::select(['id', 'title', 'type'])->where('id', $id)->first();
         if (!$field) {
             return response()->json(['errors' => ['id' => ['Record not found']]], 404);
         }
         $field = $field->toArray();
-        unset($field['updated_at']);
-        unset($field['created_at']);
 
         return response()->json(['data' => $field], 200);
     }
+
     /**
      * Creates a new field. Validation is performed to check
      * if the given types is from the accpeted types before trying
@@ -64,6 +64,7 @@ class FieldController extends Controller
 
         return response()->json(['data' =>['msg' => 'Field created successfully!', 'field' => $field]], 201);
     }
+
     /**
      * Deletes a field given an id. Performs a check if there are any
      * subscriber fields of this field and if there are, the field is not deleted

@@ -27,7 +27,7 @@ class ManageFieldsTest extends TestCase
                     "title" => "Frequent Flyer Number",
                     "type" => "number"
                 ]
-            ]   
+            ]
         ]);
     }
     /**
@@ -38,11 +38,11 @@ class ManageFieldsTest extends TestCase
         $this->json('GET', 'api/getField/1')
         ->assertStatus(200)
         ->assertJsonFragment([
-            "data"=> [ 
+            "data"=> [
                 "id" => 1,
                  "title" => "User code",
                 "type" => "string"
-            ]   
+            ]
         ]);
     }
     /**
@@ -53,7 +53,7 @@ class ManageFieldsTest extends TestCase
         $this->json('GET', 'api/getField/100')
         ->assertStatus(404)
         ->assertJsonFragment([
-            'errors' => 
+            'errors' =>
                 ['id' => ['Record not found']]
         ]);
     }
@@ -68,13 +68,13 @@ class ManageFieldsTest extends TestCase
         ->assertStatus(201)
         ->assertJsonFragment([
             'data' =>[
-                'msg' => 'Field created successfully!', 
+                'msg' => 'Field created successfully!',
                 'field' => [
                     'id' => 3,
                     'title' => 'Date of Birth',
                     'type' => 'date'
-                ]  
-            ]    
+                ]
+            ]
         ]);
     }
     /**
@@ -87,7 +87,7 @@ class ManageFieldsTest extends TestCase
         $this->json('POST', 'api/createField', $payload)
         ->assertStatus(422)
         ->assertJsonStructure([
-            'errors'   
+            'errors'
         ]);
     }
     /**
@@ -100,8 +100,8 @@ class ManageFieldsTest extends TestCase
         ->assertStatus(200)
         ->assertJsonFragment([
             'data' =>[
-                'msg' => 'Field deleted successfully!',  
-            ]    
+                'msg' => 'Field deleted successfully!',
+            ]
         ]);
     }
     /**
@@ -113,7 +113,7 @@ class ManageFieldsTest extends TestCase
         ->assertStatus(422)
         ->assertJsonFragment([
             'errors' => ['id' =>
-                ['Cannot delete field as it is assigned to subscribers']]   
+                ['Cannot delete field as it is assigned to subscribers']]
         ]);
     }
     /**
@@ -124,7 +124,7 @@ class ManageFieldsTest extends TestCase
         $this->json('DELETE', 'api/deleteField/111')
         ->assertStatus(404)
         ->assertJsonFragment([
-            'errors' => ['id' => ['Record not found'] ] 
+            'errors' => ['id' => ['Record not found'] ]
         ]);
     }
 }
