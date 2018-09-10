@@ -46,6 +46,7 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        return parent::render($request, $exception);
+        $code = $exception->getStatusCode();
+        return response()->json(['errors' => ['Error occured.']], $code);
     }
 }
