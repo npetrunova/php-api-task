@@ -36,10 +36,10 @@ This API contains endpoints for manipulating data on fields and subscribers.
 ### Fields API
 
 - **GET** `http://yoururl.dev/api/getFields`- will retrieve all existing fields. No parameters needed.
-- **GET** `http://yoururl.dev/api/getField/{id}`- will retrieve a single entry of a field. 
+- **GET** `http://yoururl.dev/api/getField/{id}`- will retrieve a single field entry. 
 	- Parameters:
 	   -  id - field id (primary key).
- - **DELETE** `http://yoururl.dev/api/deleteField/{id}`- will delete a single entry of a field. 
+ - **DELETE** `http://yoururl.dev/api/deleteField/{id}`- will delete a single field entry. 
 	 - Parameters:
 	   -  id - field id (primary key).
  - **POST** `http://yoururl.dev/api/createField` - will create a new field. 
@@ -53,3 +53,28 @@ This API contains endpoints for manipulating data on fields and subscribers.
 	  }
 	```
 	Valid field types are: `date, number, boolean, string`.
+
+### Subscriber API
+- **GET** `http://yoururl.dev/api/getSubscribers` - will retrieve all existing subscribers. No parameters needed.
+- **GET** `http://yoururl.dev/api/getSubscriber/{id}` - will retrieve a single subscriber entry.
+	- Parameters:
+	   -  id - field id (primary key).
+- **GET** `http://yoururl.dev/api/getSubscribersByState/{state}` - will retrieve all subscribers that have a give state
+	- Parameters:
+	   -  state - can be 'active', 'unsubscribed', 'junk', 'bounced', 'unconfirmed'
+- **POST** `http://yoururl.dev/api/createField - will create a subscriber
+	- Required headers:
+		 - `Accept: application/json`
+	 - Body(application/json): 
+	 ``` 
+	  {
+	  "name": "John Smit",
+	  "email":"validEmail@gmail.com"
+	  "fields":[
+		  //it can be an empty array or
+		  {
+			  "id":<valid field id>
+			  "value":"some value"
+		  }
+	  	]
+	  }	   
