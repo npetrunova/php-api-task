@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\NotFoundHttpException;
 
 class FieldController extends Controller
 {
+    /**
+     * Retrieves all fields from the database
+     * @return Response
+     */
     public function retrieveFields()
     {
         $fields = Field::select(['id', 'title', 'type'])->get();
@@ -18,7 +22,10 @@ class FieldController extends Controller
 
         return response()->json([], 204);
     }
-
+    /**
+     * Retreieve a field given an id
+     * @param int $id
+     */
     public function retrieveField($id)
     {
         $field = Field::find($id);
@@ -31,7 +38,13 @@ class FieldController extends Controller
 
         return response()->json(['data' => $field], 200);
     }
-
+    /**
+     * Creates a new field. Validation is performed to check
+     * if the given types is from the accpeted types before trying
+     * to save to the database
+     * @param Request $request
+     * @return Response
+     */
     public function createField(Request $request)
     {
         $acceptedTypes = ['date', 'number', 'boolean', 'string'];
@@ -50,7 +63,12 @@ class FieldController extends Controller
 
         return response()->json(['data' =>['msg' => 'Field created successfully!', 'field' => $field]], 201);
     }
-
+    /**
+     * Deletes a field given an id. Performs a check if there are any
+     * subscriber fields of this field and if there are, the field is not deleted
+     * @param int $id
+     * @return Response
+     */
     public function deleteField($id)
     {
         $field = Field::find($id);
