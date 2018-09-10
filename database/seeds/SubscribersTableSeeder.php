@@ -25,6 +25,12 @@ class SubscribersTableSeeder extends Seeder
                     'state' => 'active'
                 ]
             );
+            DB::table('subscribers')->insert(
+                [
+                    'name' => 'Jim Smith',
+                    'email'  => 'jim@gmail.com'
+                ]
+            );
         }
     }
 }
