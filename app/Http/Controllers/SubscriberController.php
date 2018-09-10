@@ -28,7 +28,7 @@ class SubscriberController extends Controller
         $email = $request->input('email');
         $fields = $request->input('fields');
         // Validate email domain
-        $isValidEmailDomain = Subscriber::validateEmailDomain($email);
+        $isValidEmailDomain = validateEmailDomain($email);
 
         if (!$isValidEmailDomain) {
             return response()->json(['errors' => 'Invalid emmail domain'], 422);
@@ -39,10 +39,10 @@ class SubscriberController extends Controller
             $createdRecord = $this->saveSubscriber($name, $email);
             $responseArray = ['data' => ['msg' => 'Subscriber created successfully', 'subscriber' => $createdRecord]];
 
-            return response()->json($responseArray, 200);
+            return response()->json($responseArray, 201);
         }
         // Make sure the field values are of valid types
-        $fieldValidationErrors = SubscriberField::checkFieldsForErrors($fields);
+        $fieldValidationErrors = checkFieldsForErrors($fields);
         if (!empty($fieldValidationErrors)) {
             return response()->json(['errors' => $fieldValidationErrors], 422);
         }
@@ -83,7 +83,7 @@ class SubscriberController extends Controller
         $subscribers = Subscriber::with('fields.field')->get();
 
         if (count($subscribers) > 0) {
-            $responseArray = Subscriber::formatSubscriberDataArray($subscribers);
+            $responseArray = formatSubscriberDataArray($subscribers);
             return response()->json(['data' => $responseArray], 200);
         }
 
@@ -101,7 +101,7 @@ class SubscriberController extends Controller
             ->get();
 
         if (count($subscribers) > 0) {
-            $responseArray = Subscriber::formatSubscriberDataArray($subscribers);
+            $responseArray = formatSubscriberDataArray($subscribers);
             return response()->json(['data' => $responseArray], 200);
         }
 
@@ -119,7 +119,7 @@ class SubscriberController extends Controller
         if ($subscriber === null) {
             return response()->json(['errors' => ['id' => ['Record not found']]], 404);
         }
-        $responseArray = Subscriber::formatSubscriberData($subscriber);
+        $responseArray = formatSubscriberData($subscriber);
 
         return response()->json(['data' => $responseArray], 200);
     }
@@ -167,7 +167,7 @@ class SubscriberController extends Controller
             return response()->json(['errors' => ['id' => ['Record not found']]], 404);
         }
 
-        $isValidEmailDomain = Subscriber::validateEmailDomain($request->input('email'));
+        $isValidEmailDomain = validateEmailDomain($request->input('email'));
 
         if (!$isValidEmailDomain) {
             return response()->json(['errors' => 'Invalid emmail domain'], 422);

@@ -38,7 +38,7 @@ class SubscriberFieldController extends Controller
                     ->where('subscriber_id', $id)
                     ->where('field_id', $toUpdate['id'])
                     ->first();
-                $isValidType  = SubscriberField::validateFieldType($subscriberField->field->type, $toUpdate['value']);
+                $isValidType  = validateFieldType($subscriberField->field->type, $toUpdate['value']);
                 if ($subscriberField === null || !$isValidType) {
                     $isValidFields  = false;
                     break;
@@ -88,7 +88,7 @@ class SubscriberFieldController extends Controller
                     $isValidFields = false;
                     break;
                 }
-                $isValidInput = SubscriberField::validateFieldType($fieldModel->type, $newField['value']);
+                $isValidInput = validateFieldType($fieldModel->type, $newField['value']);
                 $existsAlready = SubscriberField::where('field_id', $newField['id'])
                     ->where('subscriber_id', $id)
                     ->exists();
