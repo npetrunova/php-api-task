@@ -29,6 +29,11 @@ The solution is written in Laravel 5.6 and has the following technical dependenc
 - Run command `php artisan migrate` to create required DB tables.
 - Run command `php artisan db:seed` to seed the database with test data.
 
+### Running tests
+
+- Make sure to run `php artisan migrate:refresh --seed` before each time you try to run the tests. 
+- Run command `composer test`
+
 ## API
 
 This API contains endpoints for manipulating data on fields and subscribers.
@@ -61,8 +66,8 @@ This API contains endpoints for manipulating data on fields and subscribers.
 	   -  id - field id (primary key).
 - **GET** `http://yoururl.dev/api/getSubscribersByState/{state}` - will retrieve all subscribers that have a give state
 	- Parameters:
-	   -  state - can be 'active', 'unsubscribed', 'junk', 'bounced', 'unconfirmed'
-- **POST** `http://yoururl.dev/api/createField - will create a subscriber
+	   -  state - can be `active`, `unsubscribed`, `junk`, `bounced`, `unconfirmed`
+- **POST** `http://yoururl.dev/api/createSubscriber` - will create a subscriber
 	- Required headers:
 		 - `Accept: application/json`
 	 - Body(application/json): 
@@ -77,4 +82,64 @@ This API contains endpoints for manipulating data on fields and subscribers.
 			  "value":"some value"
 		  }
 	  	]
-	  }	   
+	  }
+- **DELETE** `http://yoururl.dev/api/deleteSubscriber/{id}` - will delete a subscriber and any related subscriber fields.
+    - Parameters:
+        - id - subsriber id (primary key)
+ - **POST** `http://yoururl.dev/api/updateSubscriber/{id}` - will update subscriber email and name.
+    - Parameters:
+        - id - subsriber id (primary key)
+    - Body (application/json):
+    	 ``` 
+	  {
+	  "name": "John Smit",
+	  "email":"validEmail@gmail.com"
+	  }
+ - **POST** `http://yoururl.dev/api/updateSubscriberState/{id}` - will update subscriber to a new state.
+    - Parameters:
+        - id - subsriber id (primary key)
+    - Body (application/json):
+    	 ``` 
+	  {
+	  "state": "active",
+	  }	 
+	  ```
+        Possible subscriber states: `active`, `unsubscribed`, `junk`, `bounced`, `unconfirmed`
+ - **POST** `http://yoururl.dev/api/updateSubscriberFields/{id}` - will update existing subscriber fields.
+    - Parameters:
+        - id - subsriber id (primary key)
+    - Body (application/json):
+    	 ``` 
+    	 {
+             "fields": [
+                 {
+                   "id": 1,
+                   "value": "Edited"
+                 }
+               ]
+        }
+	  ```
+ - **POST** `http://yoururl.dev/api/addSubscriberFields/{id}` - will add new fields to an existing subscriber.
+    - Parameters:
+        - id - subsriber id (primary key)
+    - Body (application/json):
+    	 ``` 
+    	 {
+             "fields": [
+                 {
+                   "id": 1,
+                   "value": "New value"
+                 }
+               ]
+        }
+	  ```	  
+ - **DELETE** `http://yoururl.dev/api/deleteSubscriberFields/{id}` - will remove subscriber fields.
+    - Parameters:
+        - id - subsriber id (primary key)
+    - Body (application/json):
+    	 ``` 
+    	 {
+             "fieldIds": [1]
+        }
+	  ```  
+	  
