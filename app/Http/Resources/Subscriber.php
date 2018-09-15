@@ -3,7 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\Field as FieldResource;
+use App\Http\Resources\SubscriberField as SubscriberFieldResource;
 
 class Subscriber extends JsonResource
 {
@@ -20,7 +20,7 @@ class Subscriber extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'state' => $this->state,
-            'fields' => FieldResource::collection($this->fields),
+            'fields' => SubscriberFieldResource::collection($this->fields),
         ];
     }
 }
