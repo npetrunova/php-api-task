@@ -7,6 +7,7 @@ use App\Subscriber;
 use App\Field;
 use App\SubscriberField;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\SubscriberFieldRequest;
 
 class SubscriberFieldController extends Controller
 {
@@ -16,15 +17,8 @@ class SubscriberFieldController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function updateSubscriberFields($id, Request $request)
+    public function updateSubscriberFields($id, SubscriberFieldRequest $request)
     {
-        $validator = Validator::make($request->all(), SubscriberField::$rules, SubscriberField::$messages);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            return response()->json(['errors' => $errors->toArray()], 422);
-        }
-
         $subscriber = Subscriber::find($id);
 
         if (!$subscriber) {
@@ -66,15 +60,8 @@ class SubscriberFieldController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function addSubscriberFields($id, Request $request)
+    public function addSubscriberFields($id, SubscriberFieldRequest $request)
     {
-        $validator = Validator::make($request->all(), SubscriberField::$rules, SubscriberField::$messages);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            return response()->json(['errors' => $errors->toArray()], 422);
-        }
-
         $subscriber = Subscriber::find($id);
 
         if (!$subscriber) {

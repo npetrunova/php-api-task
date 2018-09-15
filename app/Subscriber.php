@@ -12,4 +12,6 @@ class Subscriber extends Model
     {
         return $this->hasMany('App\SubscriberField');
     }
+
+    public static $acceptedStates = ['active', 'unsubscribed', 'junk', 'bounced', 'unconfirmed'];
 }

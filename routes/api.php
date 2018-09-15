@@ -24,7 +24,7 @@ Route::get('getSubscribersByState/{state}', 'SubscriberController@retrieveSubscr
 Route::get('getSubscriber/{id}', 'SubscriberController@retrieveSubscriber');
 Route::delete('deleteSubscriber/{id}', 'SubscriberController@deleteSubscriber');
 Route::put('updateSubscriber/{id}', 'SubscriberController@updateSubscriber');
-Route::post('updateSubscriberState/{id}', 'SubscriberController@updateSubscriberState');
-Route::post('updateSubscriberFields/{id}', 'SubscriberFieldController@updateSubscriberFields');
+Route::put('updateSubscriberState/{id}', 'SubscriberController@updateSubscriberState');
+Route::put('updateSubscriberFields/{id}', 'SubscriberFieldController@updateSubscriberFields');
 Route::post('addSubscriberFields/{id}', 'SubscriberFieldController@addSubscriberFields');
 Route::delete('deleteSubscriberFields/{id}', 'SubscriberFieldController@deleteSubscriberFields');

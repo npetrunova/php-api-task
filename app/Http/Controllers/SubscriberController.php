@@ -8,6 +8,7 @@ use App\SubscriberField;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\SubscriberRequest;
+use App\Http\Requests\SubscriberStateRequest;
 
 class SubscriberController extends Controller
 {
@@ -163,18 +164,8 @@ class SubscriberController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function updateSubscriberState($id, Request $request)
+    public function updateSubscriberState($id, SubscriberStateRequest $request)
     {
-        $acceptedStates = ['active', 'unsubscribed', 'junk', 'bounced', 'unconfirmed'];
-        $validator = Validator::make($request->all(), [
-            'state' => 'in:'.implode(',', $acceptedStates)
-        ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            return response()->json(['errors' => $errors->toArray()], 422);
-        }
-
         $subscriber = Subscriber::find($id);
 
         if (!$subscriber) {
