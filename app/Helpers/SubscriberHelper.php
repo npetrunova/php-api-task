@@ -1,17 +1,4 @@
 <?php
-if (!function_exists('validateEmailDomain')) {
-    /**
-     * Checks is email domain exists
-     * @param String $email
-     * @return Bool
-     */
-    function validateEmailDomain($email)
-    {
-        list($user, $domain) = explode('@', $email);
-        return checkdnsrr($domain, 'MX');
-    }
-}
-
 if (!function_exists('formatSubscriberData')) {
     /**
      * Formats subscriber data in a format that contains only

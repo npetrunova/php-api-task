@@ -13,14 +13,15 @@ class Subscriber extends Model
     public static $messages = [
         'fields.*.value.required' => 'Value is required for all fields.',
         'fields.*.value.max' => 'Value cannot be bigger than 255 symbols.',
-        'fields.*.id.required'    => 'ID is required for all fields.',
+        'fields.*.id.required' => 'ID is required for all fields.',
+        'email_domain' => 'Invalid email domain.',
     ];
     /**
      * Validation rules
      */
     public static $rules = [
         'name' => 'required|max:100',
-        'email' => 'required|email|max:320',
+        'email' => 'required|email|email_domain|max:320',
         'fields.*.value' => 'required|max:255',
         'fields.*.id' => 'required'
     ];

@@ -27,12 +27,6 @@ class SubscriberController extends Controller
         $name = $request->input('name');
         $email = $request->input('email');
         $fields = $request->input('fields');
-        // Validate email domain
-        $isValidEmailDomain = validateEmailDomain($email);
-
-        if (!$isValidEmailDomain) {
-            return response()->json(['errors' => ['Invalid emmail domain']], 422);
-        }
 
         // If no additional fields, just create subscriber
         if ($fields === null || count($fields) === 0) {
@@ -169,12 +163,6 @@ class SubscriberController extends Controller
 
         if (!$subscriber) {
             return response()->json(['errors' => ['id' => ['Record not found']]], 404);
-        }
-
-        $isValidEmailDomain = validateEmailDomain($request->input('email'));
-
-        if (!$isValidEmailDomain) {
-            return response()->json(['errors' => ['Invalid emmail domain']], 422);
         }
 
         $subscriber->name = $request->input('name');
