@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\SubscriberRequest;
 use App\Http\Requests\SubscriberStateRequest;
+use App\Http\Resources\Subscriber as SubscriberResource;
 
 class SubscriberController extends Controller
 {
@@ -23,44 +24,25 @@ class SubscriberController extends Controller
         $email = $request->input('email');
         $fields = $request->input('fields');
 
-        // If no additional fields, just create subscriber
-        if ($fields === null || count($fields) === 0) {
-            $createdRecord = $this->saveSubscriber($name, $email);
-            $responseArray = ['data' => ['msg' => 'Subscriber created successfully', 'subscriber' => $createdRecord]];
-
-            return response()->json($responseArray, 201);
-        }
         // Make sure the field values are of valid types
-        $fieldValidationErrors = checkFieldsForErrors($fields);
-        if (!empty($fieldValidationErrors)) {
-            return response()->json(['errors' => $fieldValidationErrors], 422);
+        if ($fields != null && count($fields) > 0) {
+            $fieldValidationErrors = checkFieldsForErrors($fields);
+            if (!empty($fieldValidationErrors)) {
+                return response()->json(['errors' => $fieldValidationErrors], 422);
+            }
         }
 
-        $createdRecord = $this->saveSubscriber($name, $email);
-        foreach ($fields as $field) {
-            $subscriberField = SubscriberField::create(
-                ['subscriber_id' => $createdRecord->id,'field_id' => $field['id'], 'value' => $field['value']]
-            );
+        $createdRecord = Subscriber::create(['name' => $name, 'email' => $email]);
+
+        if ($fields != null && count($fields) > 0) {
+            foreach ($fields as $field) {
+                $subscriberField = SubscriberField::create(
+                    ['subscriber_id' => $createdRecord->id,'field_id' => $field['id'], 'value' => $field['value']]
+                );
+            }
         }
-        $createdRecord['fields'] = $fields;
 
-        return response()->json(['data' =>
-            ['msg' => 'Subscriber created successfully!', 'subscriber' => $createdRecord]], 201);
-    }
-
-    /**
-     * Function to save a subscriber that's being called if
-     * the data passed in the request passes all validations
-     * @param String $name
-     * @param String $email
-     * @return Subscriber
-     */
-    private function saveSubscriber($name, $email)
-    {
-        $subscriber = Subscriber::create(['name' => $name, 'email' => $email]);
-        $createdRecord = Subscriber::select('id', 'name', 'email', 'state')->where('id', $subscriber->id)->first();
-
-        return $createdRecord;
+        return new SubscriberResource(Subscriber::find($createdRecord->id));
     }
 
     /**
@@ -69,14 +51,7 @@ class SubscriberController extends Controller
      */
     public function retrieveSubscribers()
     {
-        $subscribers = Subscriber::with('fields.field')->get();
-
-        if (count($subscribers) > 0) {
-            $responseArray = formatSubscriberDataArray($subscribers);
-            return response()->json(['data' => $responseArray], 200);
-        }
-
-        return response()->json([], 204);
+        return SubscriberResource::collection(Subscriber::all());
     }
 
     /**
@@ -86,16 +61,9 @@ class SubscriberController extends Controller
      */
     public function retrieveSubscribersByState($state)
     {
-        $subscribers = Subscriber::with('fields.field')
-            ->where('state', $state)
-            ->get();
-
-        if (count($subscribers) > 0) {
-            $responseArray = formatSubscriberDataArray($subscribers);
-            return response()->json(['data' => $responseArray], 200);
-        }
-
-        return response()->json([], 204);
+        return SubscriberResource::collection(
+            Subscriber::where('state', $state)->get()
+        );
     }
 
     /**
@@ -105,14 +73,13 @@ class SubscriberController extends Controller
      */
     public function retrieveSubscriber($id)
     {
-        $subscriber = Subscriber::find($id);
-
+        $subscriber = new SubscriberResource(Subscriber::find($id));
+        
         if ($subscriber === null) {
             return response()->json(['errors' => ['id' => ['Record not found']]], 404);
         }
-        $responseArray = formatSubscriberData($subscriber);
 
-        return response()->json(['data' => $responseArray], 200);
+        return $subscriber;
     }
 
     /**
@@ -124,12 +91,10 @@ class SubscriberController extends Controller
      */
     public function deleteSubscriber($id)
     {
-        $subscriber = Subscriber::find($id);
-
-        if (!$subscriber) {
+        $subscriber = optional(Subscriber::find($id))->delete();
+        if ($subscriber == null) {
             return response()->json(['errors' => ['id' => ['Record not found']]], 404);
         }
-        $subscriber->delete();
 
         return response()->json(['data' =>['msg' => 'Subscriber deleted successfully!']], 200);
     }
@@ -154,7 +119,7 @@ class SubscriberController extends Controller
         $subscriber->email = $request->input('email');
         $subscriber->save();
 
-        return response()->json(['data' =>['msg' => 'Subscriber updated successfully!']], 200);
+        return new SubscriberResource($subscriber);
     }
 
     /**
@@ -175,6 +140,6 @@ class SubscriberController extends Controller
         $subscriber->state = $request->input('state');
         $subscriber->save();
 
-        return response()->json(['data' =>['msg' => 'Subscriber state updated successfully!']], 200);
+        return new SubscriberResource($subscriber);
     }
 }
