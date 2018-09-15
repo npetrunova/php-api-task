@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\NotFoundHttpException;
 use App\Http\Requests\FieldRequest;
+use App\Http\Resources\Field as FieldResource;
 
 class FieldController extends Controller
 {
@@ -17,12 +18,7 @@ class FieldController extends Controller
      */
     public function retrieveFields()
     {
-        $fields = Field::select(['id', 'title', 'type'])->get();
-        if (count($fields) > 0) {
-            return response()->json(['data' => $fields], 200);
-        }
-
-        return response()->json([], 204);
+        return FieldResource::collection(Field::all());
     }
 
     /**
@@ -31,13 +27,12 @@ class FieldController extends Controller
      */
     public function retrieveField($id)
     {
-        $field = Field::select(['id', 'title', 'type'])->where('id', $id)->first();
-        if (!$field) {
+        $field = new FieldResource(Field::find($id));
+        if ($field !== null) {
             return response()->json(['errors' => ['id' => ['Record not found']]], 404);
         }
-        $field = $field->toArray();
 
-        return response()->json(['data' => $field], 200);
+        return $field;
     }
 
     /**
@@ -51,10 +46,8 @@ class FieldController extends Controller
     {
         $input = $request->input();
         $field = Field::create(['title' => $input['title'], 'type' => $input['type']]);
-        unset($field['updated_at']);
-        unset($field['created_at']);
-
-        return response()->json(['data' =>['msg' => 'Field created successfully!', 'field' => $field]], 201);
+        
+        return new FieldResource($field);
     }
 
     /**

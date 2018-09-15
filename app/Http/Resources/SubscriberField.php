@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class Field extends JsonResource
+class SubscriberField extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,8 +16,9 @@ class Field extends JsonResource
     {
         return [
             'id' => $this->id,
-            'title' => $this->title,
-            'type' => $this->type
+            'fieldIdme' => $this->field_id,
+            'value' => $this->value,
+            'title' => $this->field->title,
         ];
     }
 }
