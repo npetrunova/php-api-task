@@ -24,6 +24,7 @@ class FieldController extends Controller
     /**
      * Retreieve a field given an id
      * @param int $id
+     * @return Response
      */
     public function retrieveField($id)
     {
@@ -46,7 +47,7 @@ class FieldController extends Controller
     {
         $input = $request->input();
         $field = Field::create(['title' => $input['title'], 'type' => $input['type']]);
-        
+
         return new FieldResource($field);
     }
 

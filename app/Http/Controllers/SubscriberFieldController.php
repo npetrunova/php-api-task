@@ -8,6 +8,7 @@ use App\Field;
 use App\SubscriberField;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\SubscriberFieldRequest;
+use App\Http\Resources\Subscriber as SubscriberResource;
 
 class SubscriberFieldController extends Controller
 {
@@ -50,7 +51,7 @@ class SubscriberFieldController extends Controller
                     $subscriberField->save();
             }
 
-            return response()->json(['data' =>['msg' => 'Subscriber fields updated successfully!']], 200);
+            return new SubscriberResource($subscriber);
         }
     }
 
@@ -95,7 +96,7 @@ class SubscriberFieldController extends Controller
                     $id, 'field_id' => $newField['id'], 'value' => $newField['value']]);
             }
 
-            return response()->json(['data' =>['msg' => 'Subscriber fields added successfully!']], 200);
+            return new SubscriberResource($subscriber);
         }
     }
 
@@ -121,7 +122,7 @@ class SubscriberFieldController extends Controller
                 }
             }
 
-            return response()->json(['data' =>['msg' => 'Subscriber fields deleted successfully!']], 200);
+            return new SubscriberResource($subscriber);
         }
     }
 }
