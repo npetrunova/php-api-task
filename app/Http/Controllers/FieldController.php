@@ -7,6 +7,7 @@ use App\SubscriberField;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\NotFoundHttpException;
+use App\Http\Requests\FieldRequest;
 
 class FieldController extends Controller
 {
@@ -43,20 +44,11 @@ class FieldController extends Controller
      * Creates a new field. Validation is performed to check
      * if the given types is from the accpeted types before trying
      * to save to the database
-     * @param Request $request
+     * @param FieldRequest $request
      * @return Response
      */
-    public function createField(Request $request)
+    public function createField(FieldRequest $request)
     {
-        $acceptedTypes = ['date', 'number', 'boolean', 'string'];
-        $validator = Validator::make($request->all(), [
-            'title' => 'required',
-            'type' => 'required|in:'.implode(',', $acceptedTypes),
-        ]);
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            return response()->json(['errors' => $errors->toArray()], 422);
-        }
         $input = $request->input();
         $field = Field::create(['title' => $input['title'], 'type' => $input['type']]);
         unset($field['updated_at']);
