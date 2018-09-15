@@ -15,6 +15,10 @@ class EmailDomain
      */
     public function passes($attribute, $value)
     {
+        if (strpos($value, '@') === false) {
+            return false;
+        }
+
         list($user, $domain) = explode('@', $value);
         return checkdnsrr($domain, 'MX');
     }

@@ -7,6 +7,7 @@ use App\Field;
 use App\SubscriberField;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\SubscriberRequest;
 
 class SubscriberController extends Controller
 {
@@ -15,15 +16,8 @@ class SubscriberController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function createSubcriber(Request $request)
+    public function createSubcriber(SubscriberRequest $request)
     {
-        $validator = Validator::make($request->all(), Subscriber::$rules, Subscriber::$messages);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            return response()->json(['errors' => $errors->toArray()], 422);
-        }
-
         $name = $request->input('name');
         $email = $request->input('email');
         $fields = $request->input('fields');
@@ -144,21 +138,11 @@ class SubscriberController extends Controller
      * Performs validation checks on name and email (including email domain validation)
      * before saving the changes to the database
      * @param int $id
-     * @param Request $request
+     * @param SubscriberRequest $request
      * @return Response
      */
-    public function updateSubscriber($id, Request $request)
+    public function updateSubscriber($id, SubscriberRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'max:100',
-            'email' => 'email|max:320'
-        ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            return response()->json(['errors' => $errors->toArray()], 422);
-        }
-
         $subscriber = Subscriber::find($id);
 
         if (!$subscriber) {
