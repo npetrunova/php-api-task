@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
@@ -46,6 +47,12 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ($exception instanceof \Illuminate\Validation\ValidationException) {
+            $errorMessages = $exception->errors();
+
+            return response()->json(['errors' => $errorMessages], 422);
+        }
+
         $code = $exception->getStatusCode();
         return response()->json(['errors' => ['Error occured.']], $code);
     }

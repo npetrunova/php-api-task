@@ -7,6 +7,9 @@ use App\SubscriberField;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\NotFoundHttpException;
+use App\Http\Requests\FieldRequest;
+use App\Http\Resources\Field as FieldResource;
+use \Illuminate\Support\Facades\Lang;
 
 class FieldController extends Controller
 {
@@ -16,53 +19,37 @@ class FieldController extends Controller
      */
     public function retrieveFields()
     {
-        $fields = Field::select(['id', 'title', 'type'])->get();
-        if (count($fields) > 0) {
-            return response()->json(['data' => $fields], 200);
-        }
-
-        return response()->json([], 204);
+        return FieldResource::collection(Field::all());
     }
 
     /**
      * Retreieve a field given an id
      * @param int $id
+     * @return Response
      */
     public function retrieveField($id)
     {
-        $field = Field::select(['id', 'title', 'type'])->where('id', $id)->first();
-        if (!$field) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+        $field = new FieldResource(Field::find($id));
+        if ($field->resource == null) {
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
-        $field = $field->toArray();
 
-        return response()->json(['data' => $field], 200);
+        return $field;
     }
 
     /**
      * Creates a new field. Validation is performed to check
      * if the given types is from the accpeted types before trying
      * to save to the database
-     * @param Request $request
+     * @param FieldRequest $request
      * @return Response
      */
-    public function createField(Request $request)
+    public function createField(FieldRequest $request)
     {
-        $acceptedTypes = ['date', 'number', 'boolean', 'string'];
-        $validator = Validator::make($request->all(), [
-            'title' => 'required',
-            'type' => 'required|in:'.implode(',', $acceptedTypes),
-        ]);
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            return response()->json(['errors' => $errors->toArray()], 422);
-        }
         $input = $request->input();
         $field = Field::create(['title' => $input['title'], 'type' => $input['type']]);
-        unset($field['updated_at']);
-        unset($field['created_at']);
 
-        return response()->json(['data' =>['msg' => 'Field created successfully!', 'field' => $field]], 201);
+        return new FieldResource($field);
     }
 
     /**
@@ -75,16 +62,15 @@ class FieldController extends Controller
     {
         $field = Field::find($id);
         if (!$field) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
         $subscriberFields = SubscriberField::where('field_id', $id)->exists();
         if ($subscriberFields) {
-            return response()->json(['errors' => ['id' =>
-                ['Cannot delete field as it is assigned to subscribers']]], 422);
+            return response()->json(['errors' => ['id' =>trans('custom.field_in_use')]], 422);
         }
 
         $field->delete();
 
-        return response()->json(['data' =>['msg' => 'Field deleted successfully!']], 200);
+        return response()->json(['data' =>['msg' => trans('custom.field_deleted_successfully')]], 200);
     }
 }

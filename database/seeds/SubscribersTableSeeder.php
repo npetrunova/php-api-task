@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Faker\Factory as Faker;
+use App\Subscriber;
 
 class SubscribersTableSeeder extends Seeder
 {
@@ -11,26 +13,14 @@ class SubscribersTableSeeder extends Seeder
      */
     public function run()
     {
-        if (DB::table('subscribers')->get()->count() == 0) {
-            DB::table('subscribers')->insert(
-                [
-                    'name' => 'John Doe',
-                    'email'  => 'john@gmail.com'
-                ]
-            );
-            DB::table('subscribers')->insert(
-                [
-                    'name' => 'Jane Doe',
-                    'email'  => 'jane@gmail.com',
-                    'state' => 'active'
-                ]
-            );
-            DB::table('subscribers')->insert(
-                [
-                    'name' => 'Jim Smith',
-                    'email'  => 'jim@gmail.com'
-                ]
-            );
+        $faker = Faker::create();
+
+        foreach (range(1, 10) as $index) {
+            Subscriber::create([
+                'name' => $faker->name,
+                'email' => $faker->freeEmail,
+                'state' =>  $faker->randomElement(Subscriber::$acceptedStates)
+            ]);
         }
     }
 }

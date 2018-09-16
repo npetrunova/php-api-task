@@ -3,6 +3,8 @@
 use Illuminate\Database\Seeder;
 use App\Subscriber;
 use App\Field;
+use App\SubscriberField;
+use Faker\Factory as Faker;
 
 class SubscriberFieldsTableSeeder extends Seeder
 {
@@ -13,16 +15,34 @@ class SubscriberFieldsTableSeeder extends Seeder
      */
     public function run()
     {
-        if (DB::table('subscriber_fields')->get()->count() == 0) {
-            $subscriber = Subscriber::first();
-            $field = Field::first();
-            DB::table('subscriber_fields')->insert(
-                [
-                    'subscriber_id' => $subscriber->id,
-                    'field_id'  => $field->id,
-                    'value' => 'user001'
-                ]
-            );
+
+        $subscribers = Subscriber::all()->pluck('id')->toArray();
+        $fields = Field::all()->pluck('id')->toArray();
+
+        $faker = Faker::create();
+
+        foreach (range(1, 5) as $index) {
+            $field_id = $faker->randomElement($fields);
+            $fieldType = Field::select('type')->where('id', $field_id)->first();
+
+            switch ($fieldType->type) {
+                case 'number':
+                    $value = $faker->randomNumber;
+                    break;
+                case 'string':
+                    $value = $faker->sentence;
+                    break;
+                case 'boolean':
+                    $value = $faker->boolean;
+                    break;
+                case 'date':
+                    $value = $faker->date;
+            }
+            SubscriberField::create([
+                'subscriber_id' => $faker->randomElement($subscribers),
+                'field_id' =>  $field_id,
+                'value' => $value
+            ]);
         }
     }
 }
