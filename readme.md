@@ -31,8 +31,11 @@ The solution is written in Laravel 5.6 and has the following technical dependenc
 
 ### Running tests
 
-- Make sure to run `php artisan migrate:refresh --seed` before each time you try to run the tests. 
-- Run command `composer test`
+Testing happens on separate Sqlite database.
+
+- Create a database by running command `touch database/sqlite_testing.sqlite`
+- Populate the test database by running command `php artisan migrate --database sqlite_testing --seed`
+- Run command `composer test` to execute the tests.
 
 ## API
 
