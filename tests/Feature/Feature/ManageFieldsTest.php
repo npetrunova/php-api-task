@@ -58,7 +58,7 @@ class ManageFieldsTest extends TestCase
     {
         $faker = Faker::create();
         $title = $faker->word;
-        $type = $faker->randomElement(['date', 'number', 'string', 'boolean' ]);
+        $type = $faker->randomElement(Field::$acceptedTypes);
         $payload = ['title' => $title, 'type' => $type];
 
         $this->json('POST', 'api/createField', $payload)
