@@ -49,7 +49,7 @@ class ManageFieldsTest extends TestCase
     {
         $this->json('GET', 'api/getField/100')
         ->assertStatus(404)
-        ->assertSeeText('Record not found');
+        ->assertSeeText(trans('custom.record_not_found'));
     }
     /**
      * Create successfully a field
@@ -91,11 +91,7 @@ class ManageFieldsTest extends TestCase
         $field = Field::orderBy('id', 'desc')->first();
         $this->json('DELETE', 'api/deleteField/'.$field->id)
         ->assertStatus(200)
-        ->assertJsonFragment([
-            'data' =>[
-                'msg' => 'Field deleted successfully!',
-            ]
-        ]);
+        ->assertSeeText(trans('custom.field_deleted_successfully'));
     }
     /**
      * Fails to delete as the field is referenced in subscriber_fields table
@@ -105,7 +101,7 @@ class ManageFieldsTest extends TestCase
         $subscriberField = SubscriberField::find(2);
         $this->json('DELETE', 'api/deleteField/'.$subscriberField->field_id)
         ->assertStatus(422)
-        ->assertSeeText('Cannot delete field as it is assigned to subscribers');
+        ->assertSeeText(trans('custom.field_in_use'));
     }
     /**
      * Fails to delete as the field to be deleted does not exist
@@ -114,6 +110,6 @@ class ManageFieldsTest extends TestCase
     {
         $this->json('DELETE', 'api/deleteField/111')
         ->assertStatus(404)
-        ->assertSeeText('Record not found');
+        ->assertSeeText(trans('custom.record_not_found'));
     }
 }

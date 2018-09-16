@@ -40,7 +40,7 @@ class ManageExistingSubscriberTest extends TestCase
 
         $this->json('PUT', 'api/updateSubscriber/3', $payload)
             ->assertStatus(422)
-            ->assertSeeText('Invalid email domain');
+            ->assertSeeText(trans('custom.email_domain_fail'));
     }
     /**
      * Testing updating successfully a subscriber's state
@@ -119,7 +119,7 @@ class ManageExistingSubscriberTest extends TestCase
 
         $this->json('POST', 'api/addSubscriberFields/'.$subscriber->id, $payload)
             ->assertStatus(422)
-            ->assertSeeText('Field already assigned to subscriber.');
+            ->assertSeeText(trans('custom.check_for_duplicate'));
     }
     /**
      * Testing that you can't add a field as a
@@ -144,7 +144,7 @@ class ManageExistingSubscriberTest extends TestCase
 
         $this->json('POST', 'api/addSubscriberFields/'.$subscriber->id, $payload)
             ->assertStatus(422)
-            ->assertSeeText('Invalid value type');
+            ->assertSeeText(trans('custom.check_value_type'));
     }
     /**
      * Update already existing subscriber fields with new values successfully
@@ -195,7 +195,7 @@ class ManageExistingSubscriberTest extends TestCase
 
         $this->json('PUT', 'api/updateSubscriberFields/3', $payload)
             ->assertStatus(422)
-            ->assertSeeText('Invalid value type');
+            ->assertSeeText(trans('custom.check_value_type'));
     }
     /**
      * Testing sucessfully deleting a subscriber field

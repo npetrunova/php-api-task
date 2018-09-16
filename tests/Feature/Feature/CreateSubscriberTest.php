@@ -85,7 +85,7 @@ class CreateSubscriberTest extends TestCase
 
         $this->json('POST', 'api/createSubcriber', $payload)
             ->assertStatus(422)
-            ->assertSeeText('Invalid email domain');
+            ->assertSeeText(trans('custom.email_domain_fail'));
     }
     /**
      * Test to fail to create a user with fields because of wrong type

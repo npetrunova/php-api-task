@@ -63,6 +63,6 @@ class RetrieveSubscriberTest extends TestCase
     {
         $this->json('GET', 'api/getSubscriber/300')
             ->assertStatus(404)
-            ->assertSeeText('Record not found');
+            ->assertSeeText(trans('custom.record_not_found'));
     }
 }
