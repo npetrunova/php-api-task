@@ -43,19 +43,7 @@ class CreateSubscriberTest extends TestCase
         $faker = Faker::create();
         $field = Field::find(2);
 
-        switch ($field->type) {
-            case 'number':
-                $value = $faker->randomNumber;
-                break;
-            case 'string':
-                $value = $faker->sentence;
-                break;
-            case 'boolean':
-                $value = $faker->boolean;
-                break;
-            case 'date':
-                $value = $faker->date;
-        }
+        $value = getFakeDataByType($field->type);
 
         $payload = [
             'email' => $faker->freeEmail,
@@ -108,19 +96,7 @@ class CreateSubscriberTest extends TestCase
         $faker = Faker::create();
         $field = Field::find(2);
 
-        switch ($field->type) {
-            case 'number':
-                $value = $faker->sentence;
-                break;
-            case 'string':
-                $value = $faker->boolean;
-                break;
-            case 'boolean':
-                $value = $faker->date;
-                break;
-            case 'date':
-                $value = $faker->boolean;
-        }
+        $value = getBadFakeDataByType($field->type);
 
         $payload = [
             'email' => $faker->freeEmail,

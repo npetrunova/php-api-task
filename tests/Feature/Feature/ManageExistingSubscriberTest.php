@@ -79,19 +79,7 @@ class ManageExistingSubscriberTest extends TestCase
         $subscriber = Subscriber::has('fields', '<', 1)->first();
         $field = Field::find(2);
 
-        switch ($field->type) {
-            case 'number':
-                $value = $faker->randomNumber;
-                break;
-            case 'string':
-                $value = $faker->sentence;
-                break;
-            case 'boolean':
-                $value = $faker->boolean;
-                break;
-            case 'date':
-                $value = $faker->date;
-        }
+        $value = getFakeDataByType($field->type);
 
         $payload = [
             'fields' => [
@@ -118,19 +106,8 @@ class ManageExistingSubscriberTest extends TestCase
         $subscriber = Subscriber::has('fields')->first();
         $field = $subscriber->fields[0];
 
-        switch ($field->field->type) {
-            case 'number':
-                $value = $faker->randomNumber;
-                break;
-            case 'string':
-                $value = $faker->sentence;
-                break;
-            case 'boolean':
-                $value = $faker->boolean;
-                break;
-            case 'date':
-                $value = $faker->date;
-        }
+        $value = getFakeDataByType($field->field->type);
+
         $payload = [
             'fields' => [
                 [
@@ -154,19 +131,8 @@ class ManageExistingSubscriberTest extends TestCase
         $subscriber = Subscriber::has('fields')->first();
         $field = $subscriber->fields[0];
 
-        switch ($field->field->type) {
-            case 'number':
-                $value = $faker->sentence;
-                break;
-            case 'string':
-                $value = $faker->boolean;
-                break;
-            case 'boolean':
-                $value = $faker->date;
-                break;
-            case 'date':
-                $value = $faker->boolean;
-        }
+        $value = getBadFakeDataByType($field->field->type);
+
         $payload = [
             'fields' => [
                 [
@@ -189,19 +155,8 @@ class ManageExistingSubscriberTest extends TestCase
         $subscriber = Subscriber::has('fields')->first();
         $field = $subscriber->fields[0];
 
-        switch ($field->field->type) {
-            case 'number':
-                $value = $faker->randomNumber;
-                break;
-            case 'string':
-                $value = $faker->sentence;
-                break;
-            case 'boolean':
-                $value = $faker->boolean;
-                break;
-            case 'date':
-                $value = $faker->date;
-        }
+        $value = getFakeDataByType($field->field->type);
+
         $payload = [
             'fields' => [
                 [
@@ -227,19 +182,8 @@ class ManageExistingSubscriberTest extends TestCase
         $subscriber = Subscriber::has('fields')->first();
         $field = $subscriber->fields[0];
 
-        switch ($field->field->type) {
-            case 'number':
-                $value = $faker->sentence;
-                break;
-            case 'string':
-                $value = $faker->boolean;
-                break;
-            case 'boolean':
-                $value = $faker->date;
-                break;
-            case 'date':
-                $value = $faker->boolean;
-        }
+        $value = getBadFakeDataByType($field->field->type);
+
         $payload = [
             'fields' => [
                 [
