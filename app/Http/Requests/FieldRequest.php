@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Field;
 
 class FieldRequest extends FormRequest
 {
@@ -16,7 +17,6 @@ class FieldRequest extends FormRequest
         return true;
     }
 
-    protected static $acceptedTypes = ['date', 'number', 'boolean', 'string'];
     /**
      * Get the validation rules that apply to the request.
      *
@@ -26,7 +26,7 @@ class FieldRequest extends FormRequest
     {
         return [
             'title' => 'required',
-            'type' => 'required|in:'.implode(',', self::$acceptedTypes),
+            'type' => 'required|in:'.implode(',', Field::$acceptedTypes),
         ];
     }
 }
