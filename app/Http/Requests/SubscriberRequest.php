@@ -28,6 +28,7 @@ class SubscriberRequest extends FormRequest
                 return [
                     'name' => 'required|max:100',
                     'email' => 'required|email|email_domain|max:320',
+                    'fields.*' =>'bail|does_field_exist|check_value_type',
                     'fields.*.value' => 'required|max:255',
                     'fields.*.id' => 'required'
                 ];

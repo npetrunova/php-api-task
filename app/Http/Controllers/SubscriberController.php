@@ -25,14 +25,6 @@ class SubscriberController extends Controller
         $email = $request->input('email');
         $fields = $request->input('fields');
 
-        // Make sure the field values are of valid types
-        if ($fields != null && count($fields) > 0) {
-            $fieldValidationErrors = checkFieldsForErrors($fields);
-            if (!empty($fieldValidationErrors)) {
-                return response()->json(['errors' => $fieldValidationErrors], 422);
-            }
-        }
-
         $createdRecord = Subscriber::create(['name' => $name, 'email' => $email]);
 
         if ($fields != null && count($fields) > 0) {
