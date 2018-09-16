@@ -3,14 +3,16 @@
 namespace Tests\Feature\Feature;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
+use Faker\Factory as Faker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Subscriber;
+use App\Http\Resources\Subscriber as SubscriberResource;
 
 class RetrieveSubscriberTest extends TestCase
 {
     /**
-     * A basic test example.
-     *
+     * Test to retrieve all subscribers successfully
+     * Should pass if there's no subscribers as well
      * @return void
      */
     public function testRetrieveAllSubscribersSuccessfully()
@@ -30,19 +32,18 @@ class RetrieveSubscriberTest extends TestCase
      */
     public function testRetrieveAllSubscribersByStateSuccessfully()
     {
-        $this->json('GET', 'api/getSubscribersByState/active')
+        $subscriber = Subscriber::orderBy('id', 'desc')->first();
+        $subscriberState = $subscriber->state;
+
+        $this->json('GET', 'api/getSubscribersByState/'.$subscriberState)
             ->assertStatus(200)
             ->assertJsonFragment([
-                        "id"=> 2,
-                        "name"=> "Jane Doe",
-                        "email"=> "jane@gmail.com",
-                        "state"=> "active",
-                        "fields"=> []
-            ])
-            ->assertDontSeeText('unconfirmed')
-            ->assertDontSeeText('unsubscribed')
-            ->assertDontSeeText('junk')
-            ->assertDontSeeText('bounced');
+                "id"=> $subscriber->id,
+                "name"=> $subscriber->name,
+                "email"=> $subscriber->email,
+                "state"=> $subscriberState,
+                "fields"=> []
+            ]);
     }
     /**
      * This test will pass assuming that the data for subscriber 1 has not
@@ -50,34 +51,18 @@ class RetrieveSubscriberTest extends TestCase
      */
     public function testRetrieveSubscriberByIdSucessfully()
     {
-        $this->json('GET', 'api/getSubscriber/1')
+        $subscriber = Subscriber::first();
+        $this->json('GET', 'api/getSubscriber/'.$subscriber->id)
             ->assertStatus(200)
-            ->assertJsonFragment([
-                "data" => [
-                    "id" => 1,
-                    "name" => "John Doe",
-                    "email" => "john@gmail.com",
-                    "state" => "unconfirmed",
-                    "fields" => [
-                        "1" => [
-                            "id" => 1,
-                            "fieldId" => 1,
-                            "value" => "user001",
-                            "title" => "User code"
-                        ]
-                    ]
-                ]
-            ]);
+            ->assertJsonFragment(["id" => $subscriber->id]);
     }
-
-    public function testRetrieveSubscriberByIdToDailBecauseOfUnexistingId()
+    /**
+     * Testing retrieving an unexisting subscriber
+     */
+    public function testRetrieveSubscriberByIdToFailBecauseOfUnexistingId()
     {
         $this->json('GET', 'api/getSubscriber/300')
             ->assertStatus(404)
-            ->assertJsonFragment([
-                "errors" => [
-                    'id' =>['Record not found']
-                ]
-            ]);
+            ->assertSeeText('Record not found');
     }
 }

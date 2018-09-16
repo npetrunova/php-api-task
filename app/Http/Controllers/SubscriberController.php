@@ -7,71 +7,35 @@ use App\Field;
 use App\SubscriberField;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\SubscriberRequest;
+use App\Http\Requests\SubscriberStateRequest;
+use App\Http\Resources\Subscriber as SubscriberResource;
+use \Illuminate\Support\Facades\Lang;
 
 class SubscriberController extends Controller
 {
     /**
      * Creates a new Subscriber entry and Subscriber fields entries if any
-     * @param Request $request
+     * @param SubscriberRequest $request
      * @return Response
      */
-    public function createSubcriber(Request $request)
+    public function createSubcriber(SubscriberRequest $request)
     {
-        $validator = Validator::make($request->all(), Subscriber::$rules, Subscriber::$messages);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            return response()->json(['errors' => $errors->toArray()], 422);
-        }
-
         $name = $request->input('name');
         $email = $request->input('email');
         $fields = $request->input('fields');
-        // Validate email domain
-        $isValidEmailDomain = validateEmailDomain($email);
 
-        if (!$isValidEmailDomain) {
-            return response()->json(['errors' => ['Invalid emmail domain']], 422);
+        $createdRecord = Subscriber::create(['name' => $name, 'email' => $email]);
+
+        if ($fields != null && count($fields) > 0) {
+            foreach ($fields as $field) {
+                $subscriberField = SubscriberField::create(
+                    ['subscriber_id' => $createdRecord->id,'field_id' => $field['id'], 'value' => $field['value']]
+                );
+            }
         }
 
-        // If no additional fields, just create subscriber
-        if ($fields === null || count($fields) === 0) {
-            $createdRecord = $this->saveSubscriber($name, $email);
-            $responseArray = ['data' => ['msg' => 'Subscriber created successfully', 'subscriber' => $createdRecord]];
-
-            return response()->json($responseArray, 201);
-        }
-        // Make sure the field values are of valid types
-        $fieldValidationErrors = checkFieldsForErrors($fields);
-        if (!empty($fieldValidationErrors)) {
-            return response()->json(['errors' => $fieldValidationErrors], 422);
-        }
-
-        $createdRecord = $this->saveSubscriber($name, $email);
-        foreach ($fields as $field) {
-            $subscriberField = SubscriberField::create(
-                ['subscriber_id' => $createdRecord->id,'field_id' => $field['id'], 'value' => $field['value']]
-            );
-        }
-        $createdRecord['fields'] = $fields;
-
-        return response()->json(['data' =>
-            ['msg' => 'Subscriber created successfully!', 'subscriber' => $createdRecord]], 201);
-    }
-
-    /**
-     * Function to save a subscriber that's being called if
-     * the data passed in the request passes all validations
-     * @param String $name
-     * @param String $email
-     * @return Subscriber
-     */
-    private function saveSubscriber($name, $email)
-    {
-        $subscriber = Subscriber::create(['name' => $name, 'email' => $email]);
-        $createdRecord = Subscriber::select('id', 'name', 'email', 'state')->where('id', $subscriber->id)->first();
-
-        return $createdRecord;
+        return new SubscriberResource(Subscriber::find($createdRecord->id));
     }
 
     /**
@@ -80,14 +44,7 @@ class SubscriberController extends Controller
      */
     public function retrieveSubscribers()
     {
-        $subscribers = Subscriber::with('fields.field')->get();
-
-        if (count($subscribers) > 0) {
-            $responseArray = formatSubscriberDataArray($subscribers);
-            return response()->json(['data' => $responseArray], 200);
-        }
-
-        return response()->json([], 204);
+        return SubscriberResource::collection(Subscriber::all());
     }
 
     /**
@@ -97,16 +54,9 @@ class SubscriberController extends Controller
      */
     public function retrieveSubscribersByState($state)
     {
-        $subscribers = Subscriber::with('fields.field')
-            ->where('state', $state)
-            ->get();
-
-        if (count($subscribers) > 0) {
-            $responseArray = formatSubscriberDataArray($subscribers);
-            return response()->json(['data' => $responseArray], 200);
-        }
-
-        return response()->json([], 204);
+        return SubscriberResource::collection(
+            Subscriber::where('state', $state)->get()
+        );
     }
 
     /**
@@ -116,14 +66,13 @@ class SubscriberController extends Controller
      */
     public function retrieveSubscriber($id)
     {
-        $subscriber = Subscriber::find($id);
+        $subscriber = new SubscriberResource(Subscriber::find($id));
 
-        if ($subscriber === null) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+        if ($subscriber->resource === null) {
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
-        $responseArray = formatSubscriberData($subscriber);
 
-        return response()->json(['data' => $responseArray], 200);
+        return $subscriber;
     }
 
     /**
@@ -135,14 +84,12 @@ class SubscriberController extends Controller
      */
     public function deleteSubscriber($id)
     {
-        $subscriber = Subscriber::find($id);
-
-        if (!$subscriber) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+        $subscriber = optional(Subscriber::find($id))->delete();
+        if ($subscriber == null) {
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
-        $subscriber->delete();
 
-        return response()->json(['data' =>['msg' => 'Subscriber deleted successfully!']], 200);
+        return response()->json(['data' =>['msg' => trans('custom.subscriber_deleted_successfully')]], 200);
     }
 
     /**
@@ -150,68 +97,42 @@ class SubscriberController extends Controller
      * Performs validation checks on name and email (including email domain validation)
      * before saving the changes to the database
      * @param int $id
-     * @param Request $request
+     * @param SubscriberRequest $request
      * @return Response
      */
-    public function updateSubscriber($id, Request $request)
+    public function updateSubscriber($id, SubscriberRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'max:100',
-            'email' => 'email|max:320'
-        ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            return response()->json(['errors' => $errors->toArray()], 422);
-        }
-
         $subscriber = Subscriber::find($id);
 
         if (!$subscriber) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
-        }
-
-        $isValidEmailDomain = validateEmailDomain($request->input('email'));
-
-        if (!$isValidEmailDomain) {
-            return response()->json(['errors' => ['Invalid emmail domain']], 422);
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
 
         $subscriber->name = $request->input('name');
         $subscriber->email = $request->input('email');
         $subscriber->save();
 
-        return response()->json(['data' =>['msg' => 'Subscriber updated successfully!']], 200);
+        return new SubscriberResource($subscriber);
     }
 
     /**
      * Function to update subscriber's state given an id
      * It would only update the state if it's one of the accepted values
      * @param int $id
-     * @param Request $request
+     * @param SubscriberStateRequest $request
      * @return Response
      */
-    public function updateSubscriberState($id, Request $request)
+    public function updateSubscriberState($id, SubscriberStateRequest $request)
     {
-        $acceptedStates = ['active', 'unsubscribed', 'junk', 'bounced', 'unconfirmed'];
-        $validator = Validator::make($request->all(), [
-            'state' => 'in:'.implode(',', $acceptedStates)
-        ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            return response()->json(['errors' => $errors->toArray()], 422);
-        }
-
         $subscriber = Subscriber::find($id);
 
         if (!$subscriber) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
 
         $subscriber->state = $request->input('state');
         $subscriber->save();
 
-        return response()->json(['data' =>['msg' => 'Subscriber state updated successfully!']], 200);
+        return new SubscriberResource($subscriber);
     }
 }
