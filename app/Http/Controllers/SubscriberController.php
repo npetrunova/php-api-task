@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\SubscriberRequest;
 use App\Http\Requests\SubscriberStateRequest;
 use App\Http\Resources\Subscriber as SubscriberResource;
+use \Illuminate\Support\Facades\Lang;
 
 class SubscriberController extends Controller
 {
@@ -76,7 +77,7 @@ class SubscriberController extends Controller
         $subscriber = new SubscriberResource(Subscriber::find($id));
         
         if ($subscriber === null) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
 
         return $subscriber;
@@ -93,10 +94,10 @@ class SubscriberController extends Controller
     {
         $subscriber = optional(Subscriber::find($id))->delete();
         if ($subscriber == null) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
 
-        return response()->json(['data' =>['msg' => 'Subscriber deleted successfully!']], 200);
+        return response()->json(['data' =>['msg' => trans('custom.subscriber_deleted_successfully')]], 200);
     }
 
     /**
@@ -112,7 +113,7 @@ class SubscriberController extends Controller
         $subscriber = Subscriber::find($id);
 
         if (!$subscriber) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
 
         $subscriber->name = $request->input('name');
@@ -134,7 +135,7 @@ class SubscriberController extends Controller
         $subscriber = Subscriber::find($id);
 
         if (!$subscriber) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
 
         $subscriber->state = $request->input('state');

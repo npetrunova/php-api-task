@@ -9,6 +9,7 @@ use App\SubscriberField;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\SubscriberFieldRequest;
 use App\Http\Resources\Subscriber as SubscriberResource;
+use \Illuminate\Support\Facades\Lang;
 
 class SubscriberFieldController extends Controller
 {
@@ -23,7 +24,7 @@ class SubscriberFieldController extends Controller
         $subscriber = Subscriber::find($id);
 
         if (!$subscriber) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
 
         if ($request->input('fields') !== null && count($request->input('fields')) > 0) {
@@ -40,7 +41,7 @@ class SubscriberFieldController extends Controller
                 }
             }
             if (!$isValidFields) {
-                return response()->json(['errors' => ['Invalid value type, could not update fields.']], 422);
+                return response()->json(['errors' => [trans('custom.invalid_value_type')]], 422);
             }
             foreach ($request->input('fields') as $toUpdate) {
                 $subscriberField = SubscriberField::with('field')
@@ -66,7 +67,7 @@ class SubscriberFieldController extends Controller
         $subscriber = Subscriber::find($id);
 
         if (!$subscriber) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
 
         if ($request->input('fields') !== null && count($request->input('fields')) > 0) {
@@ -88,7 +89,7 @@ class SubscriberFieldController extends Controller
 
             if (!$isValidFields) {
                 return response()->json(['errors' =>
-                    ['Invalid value type or field already exists, could not insert fields.']], 422);
+                    [trans('custom.insert_fields_fail')]], 422);
             }
 
             foreach ($request->input('fields') as $newField) {
@@ -111,7 +112,7 @@ class SubscriberFieldController extends Controller
         $subscriber = Subscriber::find($id);
 
         if (!$subscriber) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
 
         if ($request->input('fieldIds') !== null && count($request->input('fieldIds')) > 0) {

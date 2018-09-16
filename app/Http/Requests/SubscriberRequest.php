@@ -42,10 +42,10 @@ class SubscriberRequest extends FormRequest
     public function messages()
     {
         return [
-            'fields.*.value.required' => 'Value is required for all fields.',
-            'fields.*.value.max' => 'Value cannot be bigger than 255 symbols.',
-            'fields.*.id.required' => 'ID is required for all fields.',
-            'email_domain' => 'Invalid email domain.',
+            'fields.*.value.required' => trans('custom.value_required'),
+            'fields.*.value.max' => trans('custom.value_max_length'),
+            'fields.*.id.required' => trans('custom.id_required'),
+            'email_domain' => trans('custom.email_domain_fail'),
         ];
     }
 }

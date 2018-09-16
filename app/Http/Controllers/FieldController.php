@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\NotFoundHttpException;
 use App\Http\Requests\FieldRequest;
 use App\Http\Resources\Field as FieldResource;
+use \Illuminate\Support\Facades\Lang;
 
 class FieldController extends Controller
 {
@@ -30,7 +31,7 @@ class FieldController extends Controller
     {
         $field = new FieldResource(Field::find($id));
         if ($field !== null) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
 
         return $field;
@@ -61,16 +62,15 @@ class FieldController extends Controller
     {
         $field = Field::find($id);
         if (!$field) {
-            return response()->json(['errors' => ['id' => ['Record not found']]], 404);
+            return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
         $subscriberFields = SubscriberField::where('field_id', $id)->exists();
         if ($subscriberFields) {
-            return response()->json(['errors' => ['id' =>
-                ['Cannot delete field as it is assigned to subscribers']]], 422);
+            return response()->json(['errors' => ['id' =>trans('custom.field_in_use')]], 422);
         }
 
         $field->delete();
 
-        return response()->json(['data' =>['msg' => 'Field deleted successfully!']], 200);
+        return response()->json(['data' =>['msg' => trans('custom.field_deleted_successfully')]], 200);
     }
 }
