@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Faker\Factory as Faker;
+use App\Field;
 
 class FieldsTableSeeder extends Seeder
 {
@@ -11,20 +13,13 @@ class FieldsTableSeeder extends Seeder
      */
     public function run()
     {
-        // Run only if table is empty
-        if (DB::table('fields')->get()->count() == 0) {
-            DB::table('fields')->insert(
-                [
-                    'title' => 'User code',
-                    'type'  => 'string',
-                ]
-            );
-            DB::table('fields')->insert(
-                [
-                    'title' => 'Frequent Flyer Number',
-                    'type'  => 'number',
-                ]
-            );
+        $faker = Faker::create();
+
+        foreach (range(1, 5) as $index) {
+            Field::create([
+                'title' => $faker->word,
+                'type' =>  $faker->randomElement(['date', 'number', 'string', 'boolean' ])
+            ]);
         }
     }
 }
