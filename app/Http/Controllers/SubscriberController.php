@@ -67,8 +67,8 @@ class SubscriberController extends Controller
     public function retrieveSubscriber($id)
     {
         $subscriber = new SubscriberResource(Subscriber::find($id));
-        
-        if ($subscriber === null) {
+
+        if ($subscriber->resource === null) {
             return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
 

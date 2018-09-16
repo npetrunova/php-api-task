@@ -3,8 +3,10 @@
 namespace Tests\Feature\Feature;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Field;
+use App\SubscriberField;
+use Faker\Factory as Faker;
 
 class ManageFieldsTest extends TestCase
 {
@@ -13,20 +15,14 @@ class ManageFieldsTest extends TestCase
      */
     public function testRetrieveAllFields()
     {
+        $field = Field::find(2);
         $this->json('GET', 'api/getFields')
         ->assertStatus(200)
         ->assertJsonFragment([
-            "data"=> [
-                [
-                    "id" => 1,
-                    "title" => "User code",
-                    "type" => "string"
-                ],
-                [
-                    "id" => 2,
-                    "title" => "Frequent Flyer Number",
-                    "type" => "number"
-                ]
+            [
+                "id" => $field->id,
+                "title" => $field->title,
+                "type" => $field->type
             ]
         ]);
     }
@@ -35,13 +31,14 @@ class ManageFieldsTest extends TestCase
      */
     public function testRetrieveFieldByIdSuccessfully()
     {
-        $this->json('GET', 'api/getField/1')
+        $field = Field::find(2);
+        $this->json('GET', 'api/getField/'.$field->id)
         ->assertStatus(200)
         ->assertJsonFragment([
             "data"=> [
-                "id" => 1,
-                 "title" => "User code",
-                "type" => "string"
+                "id" => $field->id,
+                "title" => $field->title,
+                "type" => $field->type
             ]
         ]);
     }
@@ -52,29 +49,23 @@ class ManageFieldsTest extends TestCase
     {
         $this->json('GET', 'api/getField/100')
         ->assertStatus(404)
-        ->assertJsonFragment([
-            'errors' =>
-                ['id' => ['Record not found']]
-        ]);
+        ->assertSeeText('Record not found');
     }
     /**
      * Create successfully a field
      */
     public function testCreateFieldSuccessfully()
     {
-        $payload = ['title' => 'Date of Birth', 'type' => 'date'];
+        $faker = Faker::create();
+        $title = $faker->word;
+        $type = $faker->randomElement(['date', 'number', 'string', 'boolean' ]);
+        $payload = ['title' => $title, 'type' => $type];
 
         $this->json('POST', 'api/createField', $payload)
         ->assertStatus(201)
         ->assertJsonFragment([
-            'data' =>[
-                'msg' => 'Field created successfully!',
-                'field' => [
-                    'id' => 3,
-                    'title' => 'Date of Birth',
-                    'type' => 'date'
-                ]
-            ]
+                'title' => $title,
+                'type' => $type
         ]);
     }
     /**
@@ -82,7 +73,8 @@ class ManageFieldsTest extends TestCase
      */
     public function testCreateFieldToFailMissingType()
     {
-        $payload = ['title' => 'Date of Birth'];
+        $faker = Faker::create();
+        $payload = ['title' => $faker->word];
 
         $this->json('POST', 'api/createField', $payload)
         ->assertStatus(422)
@@ -96,7 +88,8 @@ class ManageFieldsTest extends TestCase
      */
     public function testDeleteFieldSuccessfully()
     {
-        $this->json('DELETE', 'api/deleteField/3')
+        $field = Field::orderBy('id', 'desc')->first();
+        $this->json('DELETE', 'api/deleteField/'.$field->id)
         ->assertStatus(200)
         ->assertJsonFragment([
             'data' =>[
@@ -109,12 +102,10 @@ class ManageFieldsTest extends TestCase
      */
     public function testDeleteFieldFailFieldInUse()
     {
-        $this->json('DELETE', 'api/deleteField/1')
+        $subscriberField = SubscriberField::find(2);
+        $this->json('DELETE', 'api/deleteField/'.$subscriberField->field_id)
         ->assertStatus(422)
-        ->assertJsonFragment([
-            'errors' => ['id' =>
-                ['Cannot delete field as it is assigned to subscribers']]
-        ]);
+        ->assertSeeText('Cannot delete field as it is assigned to subscribers');
     }
     /**
      * Fails to delete as the field to be deleted does not exist
@@ -123,8 +114,6 @@ class ManageFieldsTest extends TestCase
     {
         $this->json('DELETE', 'api/deleteField/111')
         ->assertStatus(404)
-        ->assertJsonFragment([
-            'errors' => ['id' => ['Record not found'] ]
-        ]);
+        ->assertSeeText('Record not found');
     }
 }

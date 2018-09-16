@@ -30,7 +30,7 @@ class FieldController extends Controller
     public function retrieveField($id)
     {
         $field = new FieldResource(Field::find($id));
-        if ($field !== null) {
+        if ($field->resource == null) {
             return response()->json(['errors' => ['id' => trans('custom.record_not_found')]], 404);
         }
 

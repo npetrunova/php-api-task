@@ -3,8 +3,10 @@
 namespace Tests\Feature\Feature;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Faker\Factory as Faker;
+use App\Field;
+use App\Subscriber;
 
 class ManageExistingSubscriberTest extends TestCase
 {
@@ -15,14 +17,16 @@ class ManageExistingSubscriberTest extends TestCase
      */
     public function testUpdateSubscriberSuccessfully()
     {
-        $payload = ['email' => 'testlogin@gmail.com', 'name' => 'Johny B'];
+        $faker = Faker::create();
+        $email = $faker->freeEmail;
+        $name = $faker->name;
+        $payload = ['email' => $email, 'name' => $name];
 
-        $this->json('POST', 'api/updateSubscriber/3', $payload)
+        $this->json('PUT', 'api/updateSubscriber/3', $payload)
             ->assertStatus(200)
             ->assertJsonFragment([
-                'data' => [
-                    'msg' => "Subscriber updated successfully!"
-                ]
+                'name' => $name,
+                'email' => $email
             ]);
     }
     /**
@@ -31,11 +35,12 @@ class ManageExistingSubscriberTest extends TestCase
      */
     public function testupdateSubscriberFailOnEmailDomainCheck()
     {
-        $payload = ['email' => 'testlogin@fsdg.com', 'name' => 'Johny B'];
+        $faker = Faker::create();
+        $payload = ['email' => $faker->word, 'name' => $faker->name];
 
-        $this->json('POST', 'api/updateSubscriber/3', $payload)
+        $this->json('PUT', 'api/updateSubscriber/3', $payload)
             ->assertStatus(422)
-            ->assertSeeText('Invalid emmail domain');
+            ->assertSeeText('Invalid email domain');
     }
     /**
      * Testing updating successfully a subscriber's state
@@ -45,12 +50,10 @@ class ManageExistingSubscriberTest extends TestCase
     {
         $payload = ['state' =>'junk'];
 
-        $this->json('POST', 'api/updateSubscriberState/3', $payload)
+        $this->json('PUT', 'api/updateSubscriberState/3', $payload)
             ->assertStatus(200)
             ->assertJsonFragment([
-                'data' => [
-                    'msg' => "Subscriber state updated successfully!"
-                ]
+                'state' => 'junk'
             ]);
     }
     /**
@@ -61,7 +64,7 @@ class ManageExistingSubscriberTest extends TestCase
     {
         $payload = ['state' =>'pigeon'];
 
-        $this->json('POST', 'api/updateSubscriberState/3', $payload)
+        $this->json('PUT', 'api/updateSubscriberState/3', $payload)
             ->assertStatus(422)
             ->assertJsonStructure([
                 'errors'
@@ -72,21 +75,37 @@ class ManageExistingSubscriberTest extends TestCase
      */
     public function testAddNewFieldsToUserSuccessfully()
     {
+        $faker = Faker::create();
+        $subscriber = Subscriber::has('fields', '<', 1)->first();
+        $field = Field::find(2);
+
+        switch ($field->type) {
+            case 'number':
+                $value = $faker->randomNumber;
+                break;
+            case 'string':
+                $value = $faker->sentence;
+                break;
+            case 'boolean':
+                $value = $faker->boolean;
+                break;
+            case 'date':
+                $value = $faker->date;
+        }
+
         $payload = [
             'fields' => [
                 [
-                'id' => '1',
-                'value' => 'jfdj'
+                'id' => $field->id,
+                'value' => $value
                 ]
             ]
         ];
 
-        $this->json('POST', 'api/addSubscriberFields/3', $payload)
+        $this->json('POST', 'api/addSubscriberFields/'.$subscriber->id, $payload)
             ->assertStatus(200)
             ->assertJsonFragment([
-                'data' => [
-                    'msg' => "Subscriber fields added successfully!"
-                ]
+                'id' => $subscriber->id
             ]);
     }
     /**
@@ -95,21 +114,35 @@ class ManageExistingSubscriberTest extends TestCase
      */
     public function testAddNewFieldsToUserToFailFieldExistsAlready()
     {
+        $faker = Faker::create();
+        $subscriber = Subscriber::has('fields')->first();
+        $field = $subscriber->fields[0];
+
+        switch ($field->field->type) {
+            case 'number':
+                $value = $faker->randomNumber;
+                break;
+            case 'string':
+                $value = $faker->sentence;
+                break;
+            case 'boolean':
+                $value = $faker->boolean;
+                break;
+            case 'date':
+                $value = $faker->date;
+        }
         $payload = [
             'fields' => [
                 [
-                'id' => '1',
-                'value' => 'jfdj'
+                'id' => $field->field_id,
+                'value' => $value
                 ]
             ]
         ];
 
-        $this->json('POST', 'api/addSubscriberFields/3', $payload)
+        $this->json('POST', 'api/addSubscriberFields/'.$subscriber->id, $payload)
             ->assertStatus(422)
-            ->assertJsonFragment([
-                'errors' =>
-                    ['Invalid value type or field already exists, could not insert fields.']
-            ]);
+            ->assertSeeText('Field already assigned to subscriber.');
     }
     /**
      * Testing that you can't add a field as a
@@ -117,42 +150,71 @@ class ManageExistingSubscriberTest extends TestCase
      */
     public function testAddNewFieldsToUserToFailInvalidFieldType()
     {
+        $faker = Faker::create();
+        $subscriber = Subscriber::has('fields')->first();
+        $field = $subscriber->fields[0];
+
+        switch ($field->field->type) {
+            case 'number':
+                $value = $faker->sentence;
+                break;
+            case 'string':
+                $value = $faker->boolean;
+                break;
+            case 'boolean':
+                $value = $faker->date;
+                break;
+            case 'date':
+                $value = $faker->boolean;
+        }
         $payload = [
             'fields' => [
                 [
-                'id' => '2',
-                'value' => 'jfdj'
+                'id' => $field->field_id,
+                'value' => $value
                 ]
             ]
         ];
 
-        $this->json('POST', 'api/addSubscriberFields/3', $payload)
+        $this->json('POST', 'api/addSubscriberFields/'.$subscriber->id, $payload)
             ->assertStatus(422)
-            ->assertJsonFragment([
-                'errors' =>
-                    ['Invalid value type or field already exists, could not insert fields.']
-            ]);
+            ->assertSeeText('Invalid value type');
     }
     /**
      * Update already existing subscriber fields with new values successfully
      */
     public function testUpdateFieldsToUserSuccessfully()
     {
+        $faker = Faker::create();
+        $subscriber = Subscriber::has('fields')->first();
+        $field = $subscriber->fields[0];
+
+        switch ($field->field->type) {
+            case 'number':
+                $value = $faker->randomNumber;
+                break;
+            case 'string':
+                $value = $faker->sentence;
+                break;
+            case 'boolean':
+                $value = $faker->boolean;
+                break;
+            case 'date':
+                $value = $faker->date;
+        }
         $payload = [
             'fields' => [
                 [
-                'id' => '1',
-                'value' => 'edited'
+                'id' => $field->field_id,
+                'value' => $value
                 ]
             ]
         ];
 
-        $this->json('POST', 'api/updateSubscriberFields/3', $payload)
+        $this->json('PUT', 'api/updateSubscriberFields/'.$subscriber->id, $payload)
             ->assertStatus(200)
             ->assertJsonFragment([
-                'data' => [
-                    'msg' => "Subscriber fields updated successfully!"
-                ]
+                'fieldId' => $field->field_id
             ]);
     }
     /**
@@ -161,34 +223,50 @@ class ManageExistingSubscriberTest extends TestCase
      */
     public function testUpdateFieldsToUserToFailInvalidFieldType()
     {
+        $faker = Faker::create();
+        $subscriber = Subscriber::has('fields')->first();
+        $field = $subscriber->fields[0];
+
+        switch ($field->field->type) {
+            case 'number':
+                $value = $faker->sentence;
+                break;
+            case 'string':
+                $value = $faker->boolean;
+                break;
+            case 'boolean':
+                $value = $faker->date;
+                break;
+            case 'date':
+                $value = $faker->boolean;
+        }
         $payload = [
             'fields' => [
                 [
-                'id' => '1',
-                'value' => false
+                'id' => $field->field_id,
+                'value' => $value
                 ]
             ]
         ];
 
-        $this->json('POST', 'api/updateSubscriberFields/3', $payload)
+        $this->json('PUT', 'api/updateSubscriberFields/3', $payload)
             ->assertStatus(422)
-            ->assertJsonFragment([
-                'errors' =>
-                    ['Invalid value type, could not update fields.']
-            ]);
+            ->assertSeeText('Invalid value type');
     }
-
+    /**
+     * Testing sucessfully deleting a subscriber field
+     */
     public function testDeleteSubscriberFieldsSuccessfully()
     {
+        $subscriber = Subscriber::has('fields')->first();
+        $field = $subscriber->fields[0];
         $payload = [
-            'fieldIds' => [1]
+            'fieldIds' => [$field->field_id]
         ];
-        $this->json('DELETE', 'api/deleteSubscriberFields/3', $payload)
+        $this->json('DELETE', 'api/deleteSubscriberFields/'.$subscriber->id, $payload)
             ->assertStatus(200)
             ->assertJsonFragment([
-                'data' => [
-                    'msg' => "Subscriber fields deleted successfully!"
-                ]
+                'id' => $subscriber->id
             ]);
     }
 }

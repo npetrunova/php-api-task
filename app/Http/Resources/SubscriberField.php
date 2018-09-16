@@ -16,7 +16,7 @@ class SubscriberField extends JsonResource
     {
         return [
             'id' => $this->id,
-            'fieldIdme' => $this->field_id,
+            'fieldId' => $this->field_id,
             'value' => $this->value,
             'title' => $this->field->title,
         ];

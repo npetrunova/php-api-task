@@ -24,11 +24,20 @@ class SubscriberFieldRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'fields.*' =>'bail|does_field_exist|check_value_type|check_for_duplicate',
-            'fields.*.value' => 'required|max:255',
-            'fields.*.id' => 'required'
-        ];
+        switch ($this->method()) {
+            case 'POST':
+                return [
+                    'fields.*' =>'bail|does_field_exist|check_value_type|check_for_duplicate',
+                    'fields.*.value' => 'required|max:255',
+                    'fields.*.id' => 'required'
+                ];
+            case 'PUT':
+                return [
+                    'fields.*' =>'bail|does_field_exist|check_value_type',
+                    'fields.*.value' => 'required|max:255',
+                    'fields.*.id' => 'required'
+                ];
+        }
     }
 
     public function messages()

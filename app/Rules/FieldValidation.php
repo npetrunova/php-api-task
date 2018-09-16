@@ -30,8 +30,8 @@ class FieldValidation
 
     public function checkIfValueTypeCorrect($attribute, $value)
     {
-        $fieldId = $value['id'];
-        $fieldValue = $value['value'];
+        $fieldId = (isset($value['value']) ? $value['id'] : null);
+        $fieldValue = (isset($value['value']) ? $value['value'] : null);
         $fieldModel = Field::select(['title', 'type'])->where('id', $fieldId)->first();
 
         if ($fieldModel === null) {

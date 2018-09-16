@@ -6,6 +6,8 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Subscriber;
+use App\Field;
+use Faker\Factory as Faker;
 
 class CreateSubscriberTest extends TestCase
 {
@@ -16,19 +18,18 @@ class CreateSubscriberTest extends TestCase
      */
     public function testCreateSubscriberSuccessfully()
     {
-        $payload = ['email' => 'testlogin@gmail.com', 'name' => 'Johny B'];
+        $faker = Faker::create();
+        $payload = ['email' => $faker->freeEmail, 'name' => $faker->name];
 
         $this->json('POST', 'api/createSubcriber', $payload)
-            ->assertStatus(201)
+            ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'msg',
-                    'subscriber' => [
                         'id',
                         'name',
                         'email',
-                        'state'
-                    ],
+                        'state',
+                        'fields'
                 ]
             ]);
     }
@@ -39,35 +40,49 @@ class CreateSubscriberTest extends TestCase
      */
     public function testCreateSubscriberWithFieldsSuccessfully()
     {
+        $faker = Faker::create();
+        $field = Field::find(2);
+
+        switch ($field->type) {
+            case 'number':
+                $value = $faker->randomNumber;
+                break;
+            case 'string':
+                $value = $faker->sentence;
+                break;
+            case 'boolean':
+                $value = $faker->boolean;
+                break;
+            case 'date':
+                $value = $faker->date;
+        }
+
         $payload = [
-            'email' => 'testlogin@gmail.com',
-            'name' => 'Johny B',
+            'email' => $faker->freeEmail,
+            'name' => $faker->name,
             'fields' => [
                 [
-                'id' => '1',
-                'value' => 'jfdj'
+                'id' => $field->id,
+                'value' => $value
                 ]
             ]
         ];
 
         $this->json('POST', 'api/createSubcriber', $payload)
-            ->assertStatus(201)
+            ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'msg',
-                    'subscriber' => [
-                        'id',
-                        'name',
-                        'email',
-                        'state',
-                        'fields' =>[
-                            [
-                                'id',
-                                'value'
-                            ]
+                    'id',
+                    'name',
+                    'email',
+                    'state',
+                    'fields' =>[
+                        [
+                            'id',
+                            'value'
                         ]
-                    ],
-                 ]
+                    ]
+                ]
             ]);
     }
     /**
@@ -77,11 +92,12 @@ class CreateSubscriberTest extends TestCase
      */
     public function testCreateSubscriberToFailwithWrongEmailDomain()
     {
-        $payload = ['email' => 'testlogin@jkhsg.com', 'name' => 'Johny B'];
+        $faker = Faker::create();
+        $payload = ['email' => $faker->word, 'name' => $faker->name];
 
         $this->json('POST', 'api/createSubcriber', $payload)
             ->assertStatus(422)
-            ->assertSeeText('Invalid emmail domain');
+            ->assertSeeText('Invalid email domain');
     }
     /**
      * Test to fail to create a user with fields because of wrong type
@@ -89,13 +105,30 @@ class CreateSubscriberTest extends TestCase
      */
     public function testCreateSubscriberToFailwithWrongFieldValueType()
     {
+        $faker = Faker::create();
+        $field = Field::find(2);
+
+        switch ($field->type) {
+            case 'number':
+                $value = $faker->sentence;
+                break;
+            case 'string':
+                $value = $faker->boolean;
+                break;
+            case 'boolean':
+                $value = $faker->date;
+                break;
+            case 'date':
+                $value = $faker->boolean;
+        }
+
         $payload = [
-            'email' => 'testlogin@gmail.com',
-            'name' => 'Johny B',
+            'email' => $faker->freeEmail,
+            'name' => $faker->name,
             'fields' => [
                 [
-                'id' => '2',
-                'value' => 'jfdgh'
+                'id' => $field->id,
+                'value' => $value
                 ]
             ]
         ];
@@ -112,9 +145,10 @@ class CreateSubscriberTest extends TestCase
      */
     public function testCreateSubscriberToFailwithNoFieldValueType()
     {
+        $faker = Faker::create();
         $payload = [
-            'email' => 'testlogin@gmail.com',
-            'name' => 'Johny B',
+            'email' => $faker->freeEmail,
+            'name' => $faker->name,
             'fields' => [
                 [
                 'id' => '2'
@@ -133,14 +167,10 @@ class CreateSubscriberTest extends TestCase
      */
     public function testCreateSubscriberToFailwithNoName()
     {
+        $faker = Faker::create();
         $payload = [
-            'email' => 'testlogin@gmail.com',
-            'fields' => [
-                [
-                'id' => '2',
-                'value' => '3'
-                ]
-            ]
+            'email' => $faker->freeEmail,
+            'fields' => []
         ];
 
         $this->json('POST', 'api/createSubcriber', $payload)
