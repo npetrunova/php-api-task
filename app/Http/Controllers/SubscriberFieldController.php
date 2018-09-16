@@ -16,7 +16,7 @@ class SubscriberFieldController extends Controller
     /**
      * Updates an array of subscriber fields given a subscriber id
      * @param int $id
-     * @param Request $request
+     * @param SubscriberFieldRequest $request
      * @return Response
      */
     public function updateSubscriberFields($id, SubscriberFieldRequest $request)
@@ -44,7 +44,7 @@ class SubscriberFieldController extends Controller
     /**
      * Adds an array of subscriber fields given a subscriber id
      * @param int $id
-     * @param Request $request
+     * @param SubscriberFieldRequest $request
      * @return Response
      */
     public function addSubscriberFields($id, SubscriberFieldRequest $request)

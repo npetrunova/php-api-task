@@ -16,7 +16,7 @@ class SubscriberController extends Controller
 {
     /**
      * Creates a new Subscriber entry and Subscriber fields entries if any
-     * @param Request $request
+     * @param SubscriberRequest $request
      * @return Response
      */
     public function createSubcriber(SubscriberRequest $request)
@@ -119,7 +119,7 @@ class SubscriberController extends Controller
      * Function to update subscriber's state given an id
      * It would only update the state if it's one of the accepted values
      * @param int $id
-     * @param Request $request
+     * @param SubscriberStateRequest $request
      * @return Response
      */
     public function updateSubscriberState($id, SubscriberStateRequest $request)
