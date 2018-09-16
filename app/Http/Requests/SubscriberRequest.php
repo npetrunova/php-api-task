@@ -47,6 +47,8 @@ class SubscriberRequest extends FormRequest
             'fields.*.value.max' => trans('custom.value_max_length'),
             'fields.*.id.required' => trans('custom.id_required'),
             'email_domain' => trans('custom.email_domain_fail'),
+            'fields.*.does_field_exist' => trans('custom.does_field_exist'),
+            'fields.*.check_value_type' => trans('custom.check_value_type'),
         ];
     }
 }

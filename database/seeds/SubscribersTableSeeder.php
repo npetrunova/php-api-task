@@ -19,7 +19,7 @@ class SubscribersTableSeeder extends Seeder
             Subscriber::create([
                 'name' => $faker->name,
                 'email' => $faker->freeEmail,
-                'state' =>  $faker->randomElement(['active', 'unsubscribed', 'junk', 'bounced', 'unconfirmed' ])
+                'state' =>  $faker->randomElement(Subscriber::$acceptedStates)
             ]);
         }
     }
